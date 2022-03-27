@@ -2,12 +2,26 @@ import org.junit.Test;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Stack;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class BST {
     Node root;
+
+    @Test
+    public void test(){
+        BST bt = new BST();
+        bt.add(3);
+        bt.add(2);
+        bt.add(1);
+        bt.add(5);
+        bt.add(4);
+        bt.add(6);
+        bt.traversePostOrder(bt.root);
+    }
+
     private Node addRecursive(Node current, int value) {
         if (current == null) {
             return new Node(value);
@@ -76,13 +90,27 @@ public class BST {
         return root.left == null ? root.value : findSmallestValue(root.left);
     }
 
-    public void dfs(Node node) {
+    public void traversePreOrder(Node node) {
         if (node != null) {
-//            System.out.print(" " + node.value); // calling here = pre-order traversal
-            dfs(node.left);
-            System.out.print(" " + node.value); // calling here = in-order traversal
-            dfs(node.right);
-//            System.out.print(" " + node.value); // calling here = post-order traversal
+            System.out.print(" " + node.value);
+            traversePreOrder(node.left);
+            traversePreOrder(node.right);
+        }
+    }
+
+    public void traverseInOrder(Node node) {
+        if (node != null) {
+            traverseInOrder(node.left);
+            System.out.print(" " + node.value);
+            traverseInOrder(node.right);
+        }
+    }
+
+    public void traversePostOrder(Node node) {
+        if (node != null) {
+            traversePostOrder(node.left);
+            traversePostOrder(node.right);
+            System.out.print(" " + node.value);
         }
     }
 

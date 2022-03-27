@@ -1,19 +1,30 @@
 import java.util.HashMap;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.TreeMap;
 
 public class LinkedListQns {
     public static void main(String[] args) {
-        ListNode list1 = newLinkedList(new int[]{1, 2, 3, 4, 5}, -1);
-        ListNode list2 = newLinkedList(new int[]{3, 4, 11}, -1);
-        ListNode list3 = newLinkedList(new int[]{1, 2}, -1);
-//        printLinkedList(head);
-//        boolean res = hasCycle(head);
-//        ListNode res = removeNthFromEnd(list3, 1);
-//        printLinkedList(res);
+//        ListNode list1 = newLinkedList(new int[]{1, 2, 3, 4, 5}, -1);
+//        ListNode list2 = newLinkedList(new int[]{3, 4, 11}, -1);
+//        ListNode list3 = newLinkedList(new int[]{1, 2}, -1);
+        ListNode l1 = new ListNode(1);
+        ListNode l2 = new ListNode(2);
+//        ListNode l3 = new ListNode(3);
+//        ListNode l4 = new ListNode(4);
+//        ListNode l5 = new ListNode(5);
+//        ListNode l6 = new ListNode(6);
+        l1.next = l2;
+//        l2.next = l3;
+//        l3.next = l4;
+//        l4.next = l5;
+//        l5.next = l6;
+        l1 = removeNthFromEnd2(l1, 2);
+        System.out.println(l1);
     }
 
-    public static ListNode removeNthFromEnd(ListNode head, int n) {
+    //    19 - with hashmap
+    public ListNode removeNthFromEnd(ListNode head, int n) {
         HashMap<Integer, ListNode> map = new HashMap<>();
         int count = 0;
         while (head != null) {
@@ -32,6 +43,29 @@ public class LinkedListQns {
             map.get(prev).next = map.get(prev + 2);
         }
         return map.get(1);
+    }
+
+    public static ListNode removeNthFromEnd2(ListNode head, int n) {
+        ListNode pre = new ListNode(-1, head);
+        ListNode first = pre, second = pre;
+        while (n-- > 0) second = second.next;
+        while (second.next != null) { //
+            second = second.next;
+            first = first.next;
+        }
+        first.next = first.next.next;
+        return pre.next;
+    }
+
+    //    876
+    public static ListNode middleNode(ListNode head) {
+        if (head.next == null) return head;
+        ListNode slow = head, fast = head.next;
+        while (fast != null) {
+            slow = slow.next;
+            fast = fast.next == null ? fast.next : fast.next.next;
+        }
+        return slow;
     }
 
     public static ListNode mergeKLists(ListNode[] lists) {

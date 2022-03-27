@@ -1,8 +1,162 @@
+import org.junit.Test;
+
 import java.util.*;
+
+import static org.junit.Assert.assertTrue;
 
 public class DPQns {
     public static void main(String[] args) {
-        System.out.println(simplifyPath("/a//b/"));
+        int res = jumpBetter(new int[]{2, 5, 1, 0, 0, 0});
+        System.out.println(res);
+    }
+
+    //    45
+    public static int jumpBetter(int[] nums) {
+        if (nums.length == 1) return 0;
+        int leftBoundary = 0, rightBoundary = nums[0];
+        int farthestJump = nums[0];
+        int numJumps = 1;
+        while (farthestJump < nums.length - 1) {
+            for (int j = leftBoundary; j <= rightBoundary; j++) {
+                farthestJump = Math.max(farthestJump, j + nums[j]);
+            }
+            leftBoundary = rightBoundary + 1;
+            rightBoundary = farthestJump;
+            numJumps++;
+        }
+        return numJumps;
+    }
+
+    public static int jump(int[] nums) {
+        int len = nums.length;
+        int[] dp = new int[len];
+        Arrays.fill(dp, Integer.MAX_VALUE);
+        dp[0] = 0;
+        for (int i = 0; i < len; i++) {
+            int amtCanJump = nums[i];
+            if (amtCanJump > 0 && (i == 0 || dp[i] < Integer.MAX_VALUE)) {
+                for (int j = 1; j <= amtCanJump; j++) {
+                    if (j + i < len) {
+                        dp[j + i] = Math.min(dp[j + i], dp[i] + 1);
+                    }
+                }
+            }
+        }
+        return dp[len - 1];
+    }
+
+    //    740 - N log N with Arrays.sort for memo much better than N with Priority Queue (log N) + HashMap for memo
+    public static int deleteAndEarn(int[] nums) {
+        Arrays.sort(nums);
+        int[] sumVals = new int[nums[nums.length - 1] + 1];
+        /**
+         * sumVals:  1, 2, 3, 4, 5, 6
+         * didTake: 1, 2, 4, 6 <- prev not take + val
+         * notTake: 0, 1, 2, 4 <- max(prev take, prev not take)
+         */
+        for (int i : nums) sumVals[i]++;
+        int didTake = 0, notTake = 0;
+        for (int i = 1; i < sumVals.length; i++) {
+            int t = Math.max(didTake, notTake);
+            didTake = notTake + i * sumVals[i];
+            notTake = t;
+        }
+        return Math.max(didTake, notTake);
+    }
+
+    @Test
+    public void deleteAndEarnWorks() {
+        assertTrue(deleteAndEarn(new int[]{3, 4, 2}) == 6);
+        assertTrue(deleteAndEarn(new int[]{2, 2, 3, 3, 3, 4}) == 9);
+    }
+
+    // 746
+    public static int minCostClimbingStairs(int[] cost) {
+        int dp1 = 0, dp2 = 0;
+        for (int i = 2; i <= cost.length; i++) {
+            int t = dp1;
+            dp1 = Math.min(dp1 + cost[i - 1], dp2 + cost[i - 2]);
+            dp2 = t;
+        }
+        return dp1;
+    }
+
+    // 70
+    public static int climbStairs(int n) {
+        int[] dp = new int[n + 1];
+        return climbHelper(n, dp);
+    }
+
+    public static int climbHelper(int n, int[] dp) {
+        if (n <= 3) return n;
+        if (dp[n] > 0) return dp[n];
+        int steps = climbHelper(n - 1, dp) + climbHelper(n - 2, dp);
+        dp[n] = steps;
+        return steps;
+    }
+
+    // 118
+    public static List<List<Integer>> generate(int numRows) {
+        List<List<Integer>> dp = new ArrayList<>() {
+        };
+        for (int i = 0; i < numRows; i++) {
+            dp.add(new ArrayList<>(Arrays.asList(1)));
+        }
+        for (int i = 1; i < numRows; i++) {
+            List<Integer> prevRow = dp.get(i - 1);
+            List<Integer> currRow = dp.get(i);
+            for (int j = 1; j <= i; j++) {
+                if (j == i) {
+                    currRow.add(1);
+                } else {
+                    currRow.add(prevRow.get(j - 1) + prevRow.get(j));
+                }
+            }
+        }
+        return dp;
+    }
+
+    //    566
+    public static int[][] matrixReshape(int[][] mat, int r, int c) {
+        if (r * c != mat.length * mat[0].length) return mat;
+        int currRow = 0, currCol = 0;
+        int[][] reshaped = new int[r][c];
+
+        for (int row = 0; row < mat.length; row++) {
+            for (int col = 0; col < mat[0].length; col++) {
+                reshaped[currRow][currCol] = mat[row][col];
+                if (currCol + 1 >= c) {
+                    currCol = 0;
+                    currRow++;
+                } else {
+                    currCol++;
+                }
+            }
+        }
+
+        return reshaped;
+    }
+
+    //    221 - https://www.youtube.com/watch?v=6X7Ha2PrDmM
+    public static int maximalSquare(char[][] matrix) {
+        int rows = matrix.length;
+        int cols = matrix[0].length;
+        int[][] dp = new int[rows + 1][cols + 1];
+        int max = 0;
+//        fill bottom up dp
+        for (int row = rows - 1; row >= 0; row--) {
+            for (int col = cols - 1; col >= 0; col--) {
+                if (matrix[row][col] == '1') {
+                    int t = Math.min(dp[row + 1][col], dp[row][col + 1]);
+                    int n = 1 + Math.min(dp[row + 1][col + 1], t);
+                    dp[row][col] = n;
+                    if (n > max) max = n;
+                } else {
+                    dp[row][col] = 0;
+                }
+            }
+        }
+        return max * max;
     }
 
     public static String simplifyPath(String path) {
@@ -16,7 +170,7 @@ public class DPQns {
             }
         }
         StringBuilder fullPath = new StringBuilder();
-        if(stack.isEmpty()){
+        if (stack.isEmpty()) {
             return "/";
         }
         while (!stack.isEmpty()) {
@@ -255,33 +409,5 @@ public class DPQns {
             map[amount] = map[amount] == 0 ? min : Math.min(map[amount], min);
         }
         return map[amount];
-    }
-
-    public static int climbStairs(int n) {
-//        Map<Integer, Integer> map = new HashMap<>();
-//        map.put(1, 1);
-//        map.put(2, 2);
-//        if (n < 3) {
-//            return map.get(n);
-//        }
-//        for (int step = 3; step <= n; step++) {
-//            map.put(step, map.get(step - 2) + map.get(step - 1));
-//        }
-//        return map.get(n);
-//        2 -> 2
-//        3 -> 3
-//        4 -> 5
-//        5 -> 8
-        if (n < 2) {
-            return 1;
-        }
-        int pre = 1;
-        int pre2 = 1;
-        for (int step = 2; step <= n; step++) {
-            int t = pre + pre2;
-            pre2 = pre;
-            pre = t;
-        }
-        return pre;
     }
 }

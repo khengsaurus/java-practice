@@ -30,6 +30,19 @@ public class FBQns {
         return ans;
     }
 
+    /**
+     * N = 8
+     * C = .PBAAP.B
+     * X = 1
+     * Y = 3
+     * Expected Return Value = 3
+     *
+     * N = 5
+     * C = APABA
+     * X = 1
+     * Y = 2
+     * Expected Return Value = 1
+     */
     public static long getArtisticPhotographCount(int N, String C, int X, int Y) {
         // Write your code here
         long[] prefixP = new long[N + 1];

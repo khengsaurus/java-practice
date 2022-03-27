@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class DataTypes1 {
+public class TestStackQueue {
     public static void main(String[] args) {
 //        TestStack();
 //        TestPQ();
@@ -8,7 +8,7 @@ public class DataTypes1 {
     }
 
     // FILO
-    public static void TestStack(){
+    public static void TestStack() {
         Stack<Integer> stack = new Stack();
         stack.push(1);
         stack.push(2);
@@ -18,23 +18,23 @@ public class DataTypes1 {
         System.out.println(stack.toString());
     }
 
-//    FIFO - LL implemented w a double linked list - preserves insertion order
+    //    FIFO - LL implemented w a double linked list - preserves insertion order
 //    Poll same as remove -> remove 0'th e
-    public static void TestLL(){
+    public static void TestLL() {
         Queue<Integer> queueLL = new LinkedList<Integer>();
         queueLL.add(1);
         queueLL.add(10);
         queueLL.add(2);
 //        queueLL.offer(11);
         System.out.println(queueLL.toString());
-        while(queueLL.size() > 0){
+        while (queueLL.size() > 0) {
             System.out.println(queueLL.remove());
         }
     }
 
-//    FIFO - Priority Queue DOES NOT preserve insertion order.
+    //    FIFO - Priority Queue DOES NOT preserve insertion order.
 //    default PQ is implemented with Min-Heap! Sorting alphabetically or smallest int first
-    public static void TestPQ(){
+    public static void TestPQ() {
         Queue<Node> queuePQ = new PriorityQueue<>();
         queuePQ.add(new Node((2)));
         queuePQ.add(new Node((3)));
@@ -52,13 +52,5 @@ public class DataTypes1 {
 //        System.out.println(queuePQ.remove());
 //        }
         System.out.println(queuePQ);
-    }
-
-    public static void TestDeque(){
-        Deque<Integer> deque = new ArrayDeque<>();
-        deque.add(1);
-        deque.add(2);
-        deque.add(3);
-        System.out.println(deque.toString());
     }
 }

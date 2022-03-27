@@ -1,26 +1,181 @@
+import java.lang.reflect.Array;
 import java.util.*;
 
 public class Sandbox {
     public static void main(String[] arg) {
-//        int[] nums = new int[]{3, -4, 1, 0, -1};
-//        int[] nums = new int[]{-1, 0, 1, 0};
-//        int[] nums = new int[]{-2, -2, 0, 0, 0, 0, 1, 1, 1, 2};
-//        int[] height = new int[]{1, 8, 6, 2, 5, 4, 8, 3, 7};
-//        String s = "pwwkew";
-//        int res = lengthOfLongestSubstringBetter(s);
-        Node node1 = new Node(1);
-        Node node2 = new Node(2);
-        Node node3 = new Node(3);
-        Node node4 = new Node(4);
-        Node node5 = new Node(5);
-//        node1.next(node2);
-//        node2.next(node3);
-//        node3.next(node4);
-//        node4.next(node5);
-//        node5.next(null);
-//        Node res = copyRandomList(node1);
-
+//        System.out.println(intToRoman(20));
+//        System.out.println(brokenCalc(5, 8));
+        int[] r1 = new int[]{1, 1, 1, 1, 1, 1};
+        int[] r2 = new int[]{1, 1, 1, 1, 1, 1};
+        int[] r3 = new int[]{1, 1, 1, 1, 1, 1};
+        int[] r4 = new int[]{1, 1, 1, 1, 1, 1};
+        int[] res = kWeakestRows(new int[][]{r1, r2, r3, r4}, 1);
+        System.out.println(Arrays.toString(res));
     }
+
+    //    1337
+    public static int[] kWeakestRows(int[][] mat, int k) {
+        Map<Integer, Queue<Integer>> map = new HashMap<>();
+        int rows = mat.length, cols = mat[0].length;
+
+        for (int row = 0; row < rows; row++) {
+            int count = 0;
+            int[] _row = mat[row];
+            for (int j = 0; j < cols; j++) {
+                if (_row[j] == 0) break;
+                count++;
+            }
+            if (!map.containsKey(count)) {
+                Queue<Integer> newQueue = new LinkedList<>();
+                newQueue.add(row);
+                map.put(count, newQueue);
+            } else {
+                map.get(count).add(row);
+            }
+        }
+
+        int[] rv = new int[k];
+        int count = 0;
+        for (int i = 0; i < k; i++) {
+            while (!map.containsKey(count) || map.get(count).isEmpty()) count++;
+            rv[i] = map.get(count).remove();
+        }
+
+        return rv;
+    }
+
+    //    991 - change the target... why can't we change startValue :/
+    public static int brokenCalc(int startValue, int target) {
+        if (startValue >= target) return startValue - target;
+        if (target % 2 == 0) {
+            return 1 + brokenCalc(startValue, target / 2);
+        }
+        return 1 + brokenCalc(startValue, target + 1);
+    }
+
+    public static int brokenCalcIter(int startValue, int target) {
+        int count = 0;
+        while (target > startValue) {
+            count++;
+            if (target % 2 == 0) {
+                target /= 2;
+            } else {
+                target++;
+            }
+        }
+        return count + (startValue - target);
+    }
+
+    //    12
+    public static String intToRoman(int num) {
+//        19 ms	51 MB with hashmap
+//        10 ms	43.4 MB when using String helper(int num) w switch case
+//        Shd be faster with 2 arrays + indexing..
+        Map<Integer, String> map = new HashMap<Integer, String>(Map.of(
+                1, "I",
+                4, "IV",
+                5, "V",
+                9, "IX",
+                10, "X",
+                40, "XL",
+                50, "L",
+                90, "XC",
+                100, "C",
+                400, "CD"
+        ));
+        map.put(500, "D");
+        map.put(900, "CM");
+        map.put(1000, "M");
+        StringBuilder roman = new StringBuilder();
+        int[] vals = new int[]{1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1};
+        for (int val : vals) {
+            while (num > 0 && num >= val) {
+                num -= val;
+                String toAppend = map.get(val);
+                roman.append(toAppend);
+            }
+        }
+        return roman.toString();
+    }
+
+    //    763
+    public static List<Integer> partitionLabelsBetter(String s) {
+        int sLen = s.length();
+        int[] last = new int[26];
+        for (int i = 0; i < sLen; i++) {
+            last[s.charAt(i) - 'a'] = i;
+        }
+        int left = 0;
+        List<Integer> list = new ArrayList<>();
+
+        while (left < sLen) {
+            int right = last[s.charAt(left) - 'a'];
+            for (int i = left; i < right; i++) {
+                right = Math.max(right, last[s.charAt(i) - 'a']);
+            }
+            list.add(right - left + 1);
+            left = right + 1;
+        }
+        return list;
+    }
+
+    public static List<Integer> partitionLabels(String s) {
+        int sLen = s.length();
+        int[] firstAppearances = new int[26]; // non 0 index of first appearance
+        int[] memo = new int[sLen];
+        for (int i = 0; i < sLen; i++) {
+            int cValue = Character.getNumericValue(s.charAt(i)) - 10;
+            int firstAppearance = firstAppearances[cValue];
+            if (firstAppearance == 0) {
+                firstAppearances[cValue] = i + 1;
+                memo[i] = i;
+            } else {
+                int partitionRootIndex = firstAppearance - 1;
+                int correctTo = memo[partitionRootIndex];
+                for (int j = i; j > partitionRootIndex; j--) {
+                    memo[j] = correctTo;
+                }
+            }
+        }
+        List<Integer> breaks = new ArrayList<>();
+        int count = 1;
+        for (int i = 1; i < sLen; i++) {
+            if (memo[i] != memo[i - 1]) {
+                breaks.add(count);
+                count = 1;
+            } else {
+                count += 1;
+            }
+            if (i == sLen - 1) breaks.add(count);
+        }
+        return breaks;
+    }
+
+    //    1007
+    public static int minDominoRotations(int[] tops, int[] bottoms) {
+        int len = tops.length;
+        for (int target : new int[]{tops[0], bottoms[0]}) {
+            int rotateT = 0;
+            int rotateB = 0;
+            for (int i = 0; i < len; i++) {
+                if (tops[i] != target && bottoms[i] != target) {
+                    rotateT = -1;
+                    break;
+                }
+                if (tops[i] != target) {
+                    rotateT++;
+                }
+                if (bottoms[i] != target) {
+                    rotateB++;
+                }
+            }
+            if (rotateT != -1) {
+                return Math.min(rotateT, rotateB);
+            }
+        }
+        return -1;
+    }
+
 
     Map<Node, Node> map = new HashMap<>();
 
@@ -32,8 +187,6 @@ public class Sandbox {
         newNode.random = map.get(head.random);
         return newNode;
     }
-
-
 
     public static int maxArea(int[] height) {
         int globalMax = 0;
@@ -54,6 +207,7 @@ public class Sandbox {
         return globalMax;
     }
 
+    //    1663
     public static List<List<Integer>> threeSum(int[] nums) {
         List<List<Integer>> res = new ArrayList<>();
         if (nums.length > 2) {
@@ -123,16 +277,6 @@ public class Sandbox {
         return globalMax;
     }
 
-    public static int maxSubArray(int[] nums) {
-        int maxSum = nums[0];
-        int currSum = maxSum;
-        for (int i = 1; i < nums.length; i++) {
-            currSum = Math.max(nums[i] + currSum, nums[i]);
-            maxSum = Math.max(currSum, maxSum);
-        }
-        return maxSum;
-    }
-
     public static int[] ProductExceptSelf(int[] nums) {
         int[] ret = new int[nums.length];
 
@@ -151,16 +295,6 @@ public class Sandbox {
         //Step 3:
         return ret;
 
-    }
-
-    public static boolean containsDuplicate(int[] nums) {
-        Set<Integer> set = new HashSet<Integer>();
-        for (int i = 0; i < nums.length; i++) {
-            if (!set.add(nums[i])) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public static int maxProfit(int[] prices) {

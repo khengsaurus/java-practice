@@ -1,5 +1,9 @@
+import org.junit.Test;
+
 public class BinarySearch {
-    public static void main(String[] args) {
+
+    @Test
+    public static void test() {
         TreeNode root = new TreeNode(1);
         root.left = new TreeNode(2);
         root.right = new TreeNode(3);
@@ -7,11 +11,6 @@ public class BinarySearch {
         root.left.right = new TreeNode(5);
         root.right.left = new TreeNode(6);
         root.right.right = new TreeNode(7);
-
-    }
-
-    public static void printTree(TreeNode node) {
-
     }
 
     public static void invertNode(TreeNode node) {
