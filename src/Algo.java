@@ -1,7 +1,243 @@
+import java.lang.reflect.Array;
 import java.util.*;
 
 public class Algo {
     public static void main(String[] args) {
+//        List<List<Integer>> l = permute(new int[]{1, 2, 3});
+//        for (List<Integer> _l : l) {
+//            System.out.println(_l);
+//        }
+        List<String> res = letterCasePermutation("sad");
+        System.out.println(res);
+    }
+
+    final static int[][] fourDirs = new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+    final static int[][] eightDirs = new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, 1}, {1, -1}, {-1, -1}};
+    static List<List<Integer>> result;
+    static List<String> strRes;
+
+    //    784
+    public static List<String> letterCasePermutation(String s) {
+        char[] chars = s.toCharArray();
+        strRes = new ArrayList<>();
+        recurse784(chars, 0);
+        return strRes;
+    }
+
+    public static void recurse784(char[] chars, int start) {
+        if (start == chars.length) {
+            strRes.add(new String(chars));
+            return;
+        }
+        char c = chars[start];
+        if (Character.isDigit(c)) {
+            recurse784(chars, start + 1);
+        } else {
+            chars[start] = Character.toLowerCase(c);
+            recurse784(chars, start + 1);
+            chars[start] = Character.toUpperCase(c);
+            recurse784(chars, start + 1);
+        }
+    }
+
+    //    46
+    public static List<List<Integer>> permute(int[] nums) {
+        result = new LinkedList<>();
+        Deque<Integer> combo = new LinkedList<>();
+        boolean[] used = new boolean[nums.length];
+        backtrack46(nums, combo, used);
+        return result;
+    }
+
+    public static void backtrack46(int[] nums, Deque<Integer> combo, boolean[] used) {
+        if (combo.size() == nums.length) {
+            result.add(new ArrayList<>(combo));
+            return;
+        }
+        for (int i = 0; i < nums.length; i++) {
+            if (used[i]) continue;
+            used[i] = true;
+            combo.offerLast(nums[i]);
+            backtrack46(nums, combo, used);
+            used[i] = false;
+            combo.pollLast();
+        }
+    }
+
+    public static void swap(int[] nums, int i, int j) {
+        int t = nums[i];
+        nums[i] = nums[j];
+        nums[j] = t;
+    }
+
+    /**
+     * 77 - DECISION TREE, BACKTRACKING
+     * Base: n, Height of decision tree: k
+     * Upperbound: O(n^k)
+     */
+    public static List<List<Integer>> combine2(int n, int k) {
+        result = new LinkedList<>();
+        Deque<Integer> comb = new LinkedList<>();
+        for (int i = 1; i <= n; i++) {
+            comb.offerLast(i);
+            backTrack2(i + 1, n, k - 1, comb);
+            comb.pollLast();
+        }
+        return result;
+    }
+
+    private static void backTrack2(int start, int n, int remaining, Deque<Integer> currComb) {
+        if (remaining == 0) {
+            result.add(new LinkedList(currComb));
+            return;
+        }
+        for (int i = start; i <= n - remaining + 1; i++) {
+            currComb.offerLast(i);
+            backTrack2(i + 1, n, remaining - 1, currComb);
+            currComb.pollLast();
+        }
+    }
+
+    public static List<List<Integer>> combine(int n, int k) {
+        List<List<Integer>> combs = new ArrayList<List<Integer>>();
+        backtrack(combs, new ArrayList<Integer>(), 1, n, k);
+        return combs;
+    }
+
+    public static void backtrack(List<List<Integer>> combs, List<Integer> comb, int start, int n, int k) {
+        if (comb.size() == k) {
+            combs.add(new ArrayList<Integer>(comb)); // create new array here, else this will be a reference
+            return;
+        }
+        for (int i = start; i <= n; i++) { // the decision tree
+            comb.add(i); // decision: use i
+            backtrack(combs, comb, i + 1, n, k); // explore all options with i
+            comb.remove(comb.size() - 1); // remove i
+        }
+    }
+
+    //    410
+    public static int splitArray(int[] nums, int m) {
+        int max = 0;
+        long sum = 0;
+        for (int num : nums) {
+            max = Math.max(num, max);
+            sum += num;
+        }
+        if (m == 1) return (int) sum;
+        //binary search
+        long l = max;
+        long r = sum;
+        while (l <= r) {
+            long mid = (l + r) / 2;
+            if (valid(mid, nums, m)) {
+                System.out.println("Valid: " + l + ", " + mid + ", " + r);
+                r = mid - 1;
+            } else {
+                System.out.println("Invalid: " + l + ", " + mid + ", " + r);
+                l = mid + 1;
+            }
+        }
+        return (int) l;
+    }
+
+    public static boolean valid(long target, int[] nums, int m) {
+        int count = 1;
+        long total = 0;
+        for (int num : nums) {
+            total += num;
+            if (total > target) {
+                total = num;
+                count++;
+                if (count > m) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    //    994
+    public static int orangesRotting(int[][] grid) {
+        int rows = grid.length, cols = grid[0].length;
+        Queue<int[]> toVisit = new LinkedList<>();
+
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < cols; col++) {
+                if (grid[row][col] == 2) {
+                    for (int[] dir : fourDirs) {
+                        int newI = row + dir[0], newJ = col + dir[1];
+                        if (newI >= 0 && newJ >= 0 && newI < rows && newJ < cols && grid[newI][newJ] == 1) {
+                            toVisit.add(new int[]{row + dir[0], col + dir[1]});
+                        }
+                    }
+                }
+            }
+        }
+
+        int count = 0;
+        while (!toVisit.isEmpty()) {
+            boolean didRot = false;
+            int size = toVisit.size();
+            while (size > 0) {
+                int[] curr = toVisit.poll();
+                int i = curr[0], j = curr[1];
+                if (grid[i][j] == 1) {
+                    grid[i][j] = 2;
+                    didRot = true;
+                    for (int[] dir : fourDirs) {
+                        int newI = i + dir[0], newJ = j + dir[1];
+                        if (newI >= 0 && newJ >= 0 && newI < rows && newJ < cols) {
+                            toVisit.add(new int[]{i + dir[0], j + dir[1]});
+                        }
+                    }
+                }
+                size--;
+            }
+            if (didRot) count++;
+        }
+
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < cols; col++) {
+                if (grid[row][col] == 1) return -1;
+            }
+        }
+
+        return count;
+    }
+
+    //    116
+    public Node connect(Node root) {
+        dfs116(root);
+        return root;
+    }
+
+    public void dfs116(Node root) {
+        if (root == null) return;
+        if (root.left != null && root.right != null) {
+            root.left.next = root.right;
+        }
+        if (root.left != null) dfs116(root.left);
+        if (root.right != null) {
+            if (root.next != null) root.right.next = root.next.left;
+            dfs116(root.right);
+        }
+    }
+
+    //    617
+    public static TreeNode mergeTrees(TreeNode root1, TreeNode root2) {
+        if (root1 == null || root2 == null) {
+            root1 = root1 == null ? root2 : root1;
+        } else {
+            root1.val = root1.val + root2.val;
+            if (root1.left != null || root2.left != null) {
+                root1.left = mergeTrees(root1.left, root2.left);
+            }
+            if (root1.right != null || root2.right != null) {
+                root1.right = mergeTrees(root1.right, root2.right);
+            }
+        }
+        return root1;
     }
 
     // 567 - Check if one of s1's permutations is in a substring of s2

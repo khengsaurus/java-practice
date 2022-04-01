@@ -6,8 +6,52 @@ import static org.junit.Assert.assertTrue;
 
 public class DPQns {
     public static void main(String[] args) {
-        int res = jumpBetter(new int[]{2, 5, 1, 0, 0, 0});
-        System.out.println(res);
+//        int res = jumpBetter(new int[]{2, 5, 1, 0, 0, 0});
+//        int res = maxSubarraySumCircular(new int[]{10, -3, -2, -3});
+//        int res = getMaxLen(new int[]{1, 1, -1, 1, -1, 1, 1, 0, 1, -1, -1});
+//        int res = maxScoreSightseeingPair(new int[]{3, 7, 2, 3});
+    }
+
+    /**
+     * 1567
+     * vals: 1  1 -1  1 -1  1  1  0  1 -1 -1
+     * pos:  1  2  0  1  5  6  7  0  1  0  3
+     * neg:  0  0  3  4  2  3  4  0  0  2  1
+     */
+    public static int getMaxLen(int[] nums) {
+        int pos = 0, neg = 0, max = 0;
+        for (int i : nums) {
+            if (i == 0) {
+                pos = 0;
+                neg = 0;
+            } else if (i < 0) {
+                int t = neg == 0 ? 0 : neg + 1;
+                neg = pos + 1;
+                pos = t;
+            } else {
+                pos++;
+                neg = neg == 0 ? 0 : neg + 1;
+            }
+            max = Math.max(max, pos);
+        }
+        return max;
+    }
+
+    // 918 - Kadane
+    public static int maxSubarraySumCircular(int[] nums) {
+        if (nums.length == 1) return nums[0];
+        if (nums.length == 2) return Math.max(nums[0], nums[1]);
+        int total = 0, maxSum = -Integer.MAX_VALUE, minSum = 0;
+        int currMax = 0, currMin = 0;
+        for (int i = 0; i < nums.length; i++) {
+            total += nums[i];
+            currMax = Math.max(nums[i] + currMax, nums[i]);
+            currMin = Math.min(nums[i] + currMin, nums[i]);
+            maxSum = Math.max(currMax, maxSum);
+            minSum = Math.min(currMin, minSum);
+        }
+
+        return total == minSum ? maxSum : Math.max(maxSum, total - minSum);
     }
 
     //    45

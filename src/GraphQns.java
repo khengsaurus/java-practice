@@ -2,19 +2,222 @@ import java.util.*;
 
 class GraphQns {
     public static void main(String[] args) {
-//        int[] r2 = new int[]{1, 0, 0, 0, 1};
-//        int res = maxDistance(new int[][]{r0, r1});
-//        int res = shortestPathBinaryMatrix(new int[][]{{0, 0, 0}, {1, 1, 0}, {1, 1, 0}});
-        int[][] res = updateMatrix(new int[][]{{0, 0, 0}, {0, 1, 0}, {1, 1, 1}});
-        for (int[] r : res) {
-            System.out.println(Arrays.toString(r));
+//        List<List<Integer>> res = allPathsSourceTarget(new int[][]{{1, 2}, {3}, {3}, {}});
+//        List<List<Integer>> res = allPathsSourceTarget(new int[][]{{4, 3, 1}, {3, 2, 4}, {3}, {4}, {}});
+//        System.out.println(res);
+        int res = findCircleNum(new int[][]{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 1}, {0, 0, 1, 1}});
+        System.out.println(res);
+    }
+
+    final static int[][] fourDirs = new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+    final static int[][] eightDirs = new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, 1}, {1, -1}, {-1, -1}};
+
+    //    547
+    public static int findCircleNum(int[][] isConnected) {
+        int count = 0;
+        boolean[] isVisited = new boolean[isConnected.length];
+        for (int i = 0; i < isConnected.length; i++) {
+            if (!isVisited[i]) {
+                count++;
+                dfs547(isConnected, i, isVisited);
+            }
         }
+        return count;
+    }
+
+    public static void dfs547(int[][] isConnected, int n, boolean[] isVisited) {
+        if (!isVisited[n]) {
+            isVisited[n] = true;
+            int[] toVisit = isConnected[n];
+            for (int i = 0; i < toVisit.length; i++) {
+                if (toVisit[i] == 1 && i != n) dfs547(isConnected, i, isVisited);
+            }
+        }
+    }
+
+    // 841
+    public static boolean canVisitAllRooms(List<List<Integer>> rooms) {
+        Queue<Integer> toVisit = new LinkedList<>();
+        boolean[] visited = new boolean[rooms.size()];
+        List<Integer> currRoom = rooms.get(0);
+        visited[0] = true;
+        for (int i = 0; i < currRoom.size(); i++) toVisit.add(currRoom.get(i));
+        while (!toVisit.isEmpty()) {
+            int r = toVisit.poll();
+            if (!visited[r]) {
+                visited[r] = true;
+                currRoom = rooms.get(r);
+                for (int i = 0; i < currRoom.size(); i++) toVisit.add(currRoom.get(i));
+            }
+        }
+        for (boolean b : visited) {
+            if (!b) return false;
+        }
+        return true;
+    }
+
+    //    797
+    public static List<List<Integer>> allPathsSourceTarget(int[][] graph) {
+        List<List<Integer>> paths = new ArrayList<>();
+        for (int init : graph[0]) {
+            List<Integer> newRoute = new ArrayList<>(Arrays.asList(0, init));
+            dfs797(graph, paths, newRoute);
+        }
+        return paths;
+    }
+
+    public static void dfs797(int[][] graph, List<List<Integer>> paths, List<Integer> currRoute) {
+        int latestPos = currRoute.get(currRoute.size() - 1);
+        System.out.println(latestPos);
+        if (latestPos == graph.length - 1) {
+            paths.add(currRoute);
+        } else {
+            int[] next = graph[latestPos];
+            for (int n : next) {
+                List<Integer> continueRoute = new ArrayList<>(currRoute);
+                continueRoute.add(n);
+                dfs797(graph, paths, continueRoute);
+            }
+        }
+    }
+
+    // 934
+    public static int shortestBridge(int[][] grid) {
+        int rows = grid.length, cols = grid[0].length;
+        Queue<int[]> toVisit = new LinkedList<>();
+        boolean firstIslandFound = false;
+        for (int row = 0; row < rows && !firstIslandFound; row++) {
+            for (int col = 0; col < cols && !firstIslandFound; col++) {
+                if (grid[row][col] == 1) {
+                    dfs934(grid, toVisit, row, col);
+                    firstIslandFound = true;
+                }
+            }
+        }
+
+        int count = 0;
+        while (!toVisit.isEmpty()) {
+            int size = toVisit.size();
+            while (size > 0) {
+                int[] curr = toVisit.poll();
+                int row = curr[0], col = curr[1], val = grid[row][col];
+                if (val == 3) continue;
+                if (val == 1) return count;
+                grid[row][col] = 3;
+                for (int[] dir : fourDirs) {
+                    if (isValidCell(grid, row + dir[0], col + dir[1])) {
+                        toVisit.add(new int[]{row + dir[0], col + dir[1]});
+                    }
+                }
+                size--;
+            }
+            count++;
+        }
+        return count;
+    }
+
+    public static boolean isValidCell(int[][] grid, int row, int col) {
+        return (row >= 0 && col >= 0 && row < grid.length && col < grid[0].length);
+    }
+
+    public static boolean isValidCell(int[][] grid, int[] curr) {
+        int row = curr[0], col = curr[1];
+        return (row >= 0 && col >= 0 && row < grid.length && col < grid[0].length);
+    }
+
+    public static void dfs934(int[][] grid, Queue<int[]> toVisit, int i, int j) {
+        if (!isValidCell(grid, i, j) || grid[i][j] != 1) return;
+        grid[i][j] = 3;
+        for (int[] dir : fourDirs) {
+            int newI = i + dir[0], newJ = j + dir[1];
+            if (isValidCell(grid, newI, newJ)) {
+                int val = grid[newI][newJ];
+                if (val == 1) {
+                    dfs934(grid, toVisit, newI, newJ);
+                } else if (val == 0) {
+                    toVisit.add(new int[]{newI, newJ});
+                }
+            }
+        }
+    }
+
+    // 1926 - can this be done w dfs ??
+    public static int nearestExit(char[][] maze, int[] entrance) {
+        int rows = maze.length, cols = maze[0].length, entI = entrance[0], entJ = entrance[1];
+        maze[entI][entJ] = '+';
+        Queue<int[]> toExplore = new LinkedList<>();
+        for (int[] dir : fourDirs) {
+            int newI = entI + dir[0], newJ = entJ + dir[1];
+            if (newI >= 0 && newJ >= 0 && newI < rows && newJ < cols && maze[newI][newJ] == '.') {
+                toExplore.add(new int[]{newI, newJ});
+            }
+        }
+        return bfs1926(maze, toExplore);
+    }
+
+    private static int bfs1926(char[][] maze, Queue<int[]> toExplore) {
+        int steps = 1, rows = maze.length, cols = maze[0].length;
+        while (!toExplore.isEmpty()) {
+            int size = toExplore.size(); // Fk la bro this is impt... u have to take this out or it will recompute everytime zz
+            for (int i = 0; i < size; i++) {
+                int[] curr = toExplore.poll();
+                int row = curr[0], col = curr[1];
+                if (maze[row][col] == '.') {
+                    if (row == 0 || col == 0 || row == rows - 1 || col == cols - 1) return steps;
+                    maze[row][col] = '+';
+                    for (int[] dir : fourDirs) {
+                        int newI = row + dir[0], newJ = col + dir[1];
+                        if (newI >= 0 && newJ >= 0 && newI < rows && newJ < cols && maze[newI][newJ] == '.') {
+                            toExplore.add(new int[]{newI, newJ});
+                        }
+                    }
+                }
+            }
+            steps++;
+        }
+        return -1;
+    }
+
+    // 795
+    public static int maxAreaOfIsland(int[][] grid) {
+        int rows = grid.length, cols = grid[0].length;
+        int max = 0;
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < cols; col++) {
+                if (grid[row][col] == 1) {
+                    max = Math.max(max, bfs795(grid, row, col));
+                }
+            }
+        }
+        return max;
+    }
+
+    private static int bfs795(int[][] grid, int row, int col) {
+        int rows = grid.length, cols = grid[0].length;
+        Queue<int[]> toVisit = new LinkedList<>();
+        toVisit.add(new int[]{row, col});
+        int count = 0;
+        while (!toVisit.isEmpty()) {
+            int[] curr = toVisit.poll();
+            int i = curr[0], j = curr[1];
+            if (grid[i][j] == 1) {
+                count++;
+                grid[i][j] = 0;
+                for (int[] dir : fourDirs) {
+                    int newI = i + dir[0], newJ = j + dir[1];
+                    if (newI < rows && newJ < cols && newI >= 0 && newJ >= 0 && grid[newI][newJ] == 1)
+                        toVisit.add(new int[]{newI, newJ});
+                }
+            }
+        }
+
+        return count;
     }
 
     //    542
     public static int[][] updateMatrix(int[][] mat) {
         int rows = mat.length, cols = mat[0].length, d = 1;
-        int[][] dist = new int[rows][cols], dirs = new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        int[][] dist = new int[rows][cols];
         Queue<int[]> toVisit = new LinkedList<>();
         boolean[][] visited = new boolean[rows][cols];
 
@@ -31,7 +234,7 @@ class GraphQns {
             int size = toVisit.size();
             while (size > 0) {
                 int[] curr = toVisit.poll();
-                for (int[] dir : dirs) {
+                for (int[] dir : fourDirs) {
                     int newI = curr[0] + dir[0];
                     int newJ = curr[1] + dir[1];
                     if (newI < 0 || newI >= rows || newJ < 0 || newJ >= cols || visited[newI][newJ]) continue;
@@ -54,7 +257,6 @@ class GraphQns {
         if (grid[0][0] != 0 || grid[rows - 1][cols - 1] != 0) return -1;
 
         queue.add(new int[]{0, 0});
-        int[][] dirs = new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, 1}, {1, -1}, {-1, -1}};
 
         int path = 1; // *1 - shit this is smart
         while (!queue.isEmpty()) {
@@ -63,7 +265,7 @@ class GraphQns {
                 int[] curr = queue.poll();
                 int currI = curr[0], currJ = curr[1];
                 if (currI == rows - 1 && currJ == cols - 1) return path;
-                for (int[] dir : dirs) {
+                for (int[] dir : eightDirs) {
                     int next_i = currI + dir[0], next_j = currJ + dir[1];
                     if (next_i >= 0 && next_i < rows && next_j >= 0 && next_j < rows && grid[next_i][next_j] == 0) {
                         queue.add(new int[]{next_i, next_j});
@@ -188,7 +390,6 @@ class GraphQns {
 
     public static int bfs1162(int[][] grid, boolean[][] visited, int rows, int cols) {
         Queue<int[]> queue = new LinkedList<>();
-        int[][] directions = new int[][]{{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
         int result = -1;
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
@@ -201,7 +402,7 @@ class GraphQns {
         while (!queue.isEmpty()) {
             int[] current = queue.poll();
             int row = current[0], col = current[1];
-            for (int[] dir : directions) {
+            for (int[] dir : fourDirs) {
                 int nextI = row + dir[0], nextJ = col + dir[1];
                 if (nextI < 0 || nextJ < 0 || nextI >= rows || nextJ >= cols || visited[nextI][nextJ]) {
                     continue;
@@ -210,7 +411,6 @@ class GraphQns {
                     grid[nextI][nextJ] = grid[row][col] + 1;
                     result = Math.max(result, grid[nextI][nextJ]);
                     queue.offer(new int[]{nextI, nextJ});
-//                    for (int[] r : grid) System.out.println(Arrays.toString(r));
                 }
             }
         }
@@ -304,7 +504,8 @@ class GraphQns {
         return true;
     }
 
-    public static boolean canStudyDfs(int course, Map<Integer, List<Integer>> courseAndPreReqs, Set<Integer> visited) {
+    public static boolean canStudyDfs(int course, Map<
+            Integer, List<Integer>> courseAndPreReqs, Set<Integer> visited) {
         if (visited.contains(course)) return false;
         List<Integer> preReqs = courseAndPreReqs.get(course);
         if (preReqs == null || preReqs.size() == 0) return true;

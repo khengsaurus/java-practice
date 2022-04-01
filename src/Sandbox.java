@@ -5,12 +5,53 @@ public class Sandbox {
     public static void main(String[] arg) {
 //        System.out.println(intToRoman(20));
 //        System.out.println(brokenCalc(5, 8));
-        int[] r1 = new int[]{1, 1, 1, 1, 1, 1};
-        int[] r2 = new int[]{1, 1, 1, 1, 1, 1};
-        int[] r3 = new int[]{1, 1, 1, 1, 1, 1};
-        int[] r4 = new int[]{1, 1, 1, 1, 1, 1};
-        int[] res = kWeakestRows(new int[][]{r1, r2, r3, r4}, 1);
-        System.out.println(Arrays.toString(res));
+//        int[] r1 = new int[]{1, 1, 1, 1, 1, 1};
+//        int[] r2 = new int[]{1, 1, 1, 1, 1, 1};
+//        int[] r3 = new int[]{1, 1, 1, 1, 1, 1};
+//        int[] r4 = new int[]{1, 1, 1, 1, 1, 1};
+//        int[] res = kWeakestRows(new int[][]{r1, r2, r3, r4}, 1);
+//        System.out.println(Arrays.toString(res));
+//        int res = findDuplicateBetter(new int[]{2, 5, 9, 6, 9, 3, 8, 9, 7, 1});
+        int res = findDuplicate(new int[]{1, 2, 3, 4, 2});
+        System.out.println(res);
+    }
+
+    //    287
+    public int findDuplicateBitSet(int[] nums) {
+        BitSet bitset = new BitSet((int)Math.pow(10, 5));
+        for (int val : nums) {
+            if (bitset.get(val)) {
+                return val;
+            } else {
+                bitset.set(val);
+            }
+        }
+        return -1;
+    }
+
+    public static int findDuplicateTortHare(int[] nums) {
+//        https://www.geeksforgeeks.org/find-any-one-of-the-multiple-repeating-elements-in-read-only-array-set-2
+        int tortoise = nums[0], hare = nums[0];
+        do {
+            tortoise = nums[tortoise];
+            hare = nums[nums[hare]];
+        } while (tortoise != hare);
+
+        tortoise = nums[0];
+        while (tortoise != hare) {
+            tortoise = nums[tortoise];
+            hare = nums[hare];
+        }
+        return tortoise;
+    }
+
+    public static int findDuplicate(int[] nums) {
+        boolean[] shown = new boolean[nums.length];
+        for (int n : nums) {
+            if (shown[n]) return n;
+            shown[n] = true;
+        }
+        return nums[0];
     }
 
     //    1337

@@ -23,6 +23,20 @@ public class LinkedListQns {
         System.out.println(l1);
     }
 
+    // 83
+    public static ListNode deleteDuplicates(ListNode head) {
+        ListNode prev = new ListNode(-101, head);
+        ListNode curr = prev;
+        while (curr != null) {
+            if (curr.next != null && curr.next.val == curr.val) {
+                curr.next = curr.next.next;
+            } else {
+                curr = curr.next;
+            }
+        }
+        return prev.next;
+    }
+
     //    19 - with hashmap
     public ListNode removeNthFromEnd(ListNode head, int n) {
         HashMap<Integer, ListNode> map = new HashMap<>();
