@@ -1,10 +1,13 @@
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class Node implements Comparable<Node>, Iterator {
     public int val;
     public int value;
     public Node left;
     public Node right;
+    public List<Node> neighbors;
 
     public Node random;
     public Node next;
@@ -27,6 +30,10 @@ public class Node implements Comparable<Node>, Iterator {
         this.val = val;
         this.next = next;
         this.random = random;
+    }
+    public Node(int _val, ArrayList<Node> _neighbors) {
+        val = _val;
+        neighbors = _neighbors;
     }
 
     @Override

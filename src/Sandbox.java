@@ -3,22 +3,34 @@ import java.util.*;
 
 public class Sandbox {
     public static void main(String[] arg) {
-//        System.out.println(intToRoman(20));
-//        System.out.println(brokenCalc(5, 8));
-//        int[] r1 = new int[]{1, 1, 1, 1, 1, 1};
-//        int[] r2 = new int[]{1, 1, 1, 1, 1, 1};
-//        int[] r3 = new int[]{1, 1, 1, 1, 1, 1};
-//        int[] r4 = new int[]{1, 1, 1, 1, 1, 1};
-//        int[] res = kWeakestRows(new int[][]{r1, r2, r3, r4}, 1);
-//        System.out.println(Arrays.toString(res));
-//        int res = findDuplicateBetter(new int[]{2, 5, 9, 6, 9, 3, 8, 9, 7, 1});
-        int res = findDuplicate(new int[]{1, 2, 3, 4, 2});
-        System.out.println(res);
+    }
+
+
+    //    31
+    public static void nextPermutation(int[] nums) {
+        int len = nums.length;
+        boolean flag = false;
+        for (int i = len - 1; i > 0; i--) {
+            if (nums[i - 1] < nums[i]) {
+                int t = nums[i];
+                nums[i] = nums[i - 1];
+                nums[i - 1] = t;
+                flag = true;
+                break;
+            }
+        }
+        if (!flag) {
+            for (int i = 0; i < len / 2; i++) {
+                int t = nums[i];
+                nums[i] = nums[len - i - 1];
+                nums[len - i - 1] = t;
+            }
+        }
     }
 
     //    287
     public int findDuplicateBitSet(int[] nums) {
-        BitSet bitset = new BitSet((int)Math.pow(10, 5));
+        BitSet bitset = new BitSet((int) Math.pow(10, 5));
         for (int val : nums) {
             if (bitset.get(val)) {
                 return val;

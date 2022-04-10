@@ -1,13 +1,130 @@
 import org.junit.Test;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class StringQns {
     public static void main(String[] args) {
-        Boolean res = isPalindrome("a:vA'");
-        System.out.println(res);
+        System.out.println(countSubstrings("ababa"));
+    }
+
+    //    647. Palindromic Substrings
+    public static int countSubstrings(String s) {
+        int count = 0;
+        for (int i = 0; i < s.length(); i++) {
+            count += extendSubstrings(s, i, i);
+            count += extendSubstrings(s, i, i + 1);
+        }
+        return count;
+    }
+
+    public static int extendSubstrings(String s, int left, int right) {
+        if (left >= 0 && right < s.length()) {
+            if (s.charAt(left) == s.charAt(right)) {
+                return 1 + extendSubstrings(s, left - 1, right + 1);
+            }
+        }
+        return 0;
+    }
+
+    // 76
+    public static String minWindow(String s, String t) {
+        if (s == null || s.isEmpty() || t == null || t.isEmpty()) return "";
+        int tLen = t.length(), sLen = s.length();
+        if (tLen > sLen) return "";
+        int i = 0, j = 0;
+        int[] tMap = new int[256], sMap = new int[256], coors = new int[]{-1, -1};
+        for (int k = 0; k < t.length(); k++) {
+            tMap[t.charAt(k)]++;
+        }
+        int found = 0, len = Integer.MAX_VALUE;
+        while (j < sLen) {
+            if (found < tLen) {
+                int c = s.charAt(j);
+                if (tMap[c] > 0) {
+                    sMap[c]++;
+                    if (sMap[c] <= tMap[c]) {
+                        found++;
+                    }
+                }
+                j++;
+            }
+            while (found == tLen) {
+                if (j - i < len) {
+                    len = j - i;
+                    coors = new int[]{i, j};
+                }
+                int c = s.charAt(i);
+                if (tMap[c] > 0) {
+                    sMap[c]--;
+                    if (sMap[c] < tMap[c]) {
+                        found--;
+                    }
+                }
+                i++;
+            }
+        }
+        return coors[0] > -1 ? s.substring(coors[0], coors[1]) : "";
+    }
+
+    public static boolean hasSufficient(Map<Character, Integer> window, Map<Character, Integer> required) {
+        for (char key : required.keySet()) {
+            if (window.getOrDefault(key, 0) < required.get(key)) return false;
+        }
+        return true;
+    }
+
+
+    //
+    @Test
+    public void lengthOfLongestSubstringWorks() {
+        int res = lengthOfLongestSubstring("abba");
+        assertEquals(2, res);
+    }
+
+
+    // 3 - Sliding window approach
+    public int lengthOfLongestSubstring(String s) {
+        int result = 0, left = 0;
+        int[] cache = new int[256];
+        for (int right = 0; right < s.length(); right++) {
+            left = (cache[s.charAt(right)] > 0) ? Math.max(left, cache[s.charAt(right)]) : left;
+            cache[s.charAt(right)] = right + 1;
+            result = Math.max(result, right - left + 1);
+        }
+        return result;
+    }
+
+    //    242
+    public boolean isAnagram(String s, String t) {
+        int[] memo = new int[26];
+        int count = 0;
+        for (char c : s.toCharArray()) {
+            memo[c - 'a']++;
+            count++;
+        }
+        for (char c : t.toCharArray()) {
+            if (count-- == 0 || memo[c - 'a'] == 0) return false;
+            memo[c - 'a']--;
+        }
+        return count == 0;
+    }
+
+    //    424 - Longest repeating character replacement TODO:
+    public static int characterReplacement(String s, int k) {
+        int[] count = new int[26];
+        int len = s.length(), left = 0, maxCountRepeatedChar = 0;
+        for (int right = 0; right < len; right++) {
+            maxCountRepeatedChar = Math.max(maxCountRepeatedChar, ++count[s.charAt(right) - 'A']);
+            int replaces = right - left + 1 - maxCountRepeatedChar;
+            if (replaces > k) {
+                count[s.charAt(left++) - 'A']--;
+            }
+        }
+        return Math.min(len, maxCountRepeatedChar + k);
     }
 
     //    5
@@ -96,27 +213,6 @@ public class StringQns {
             if (arr.get(i) != arr.get(len - 1 - i)) return false;
         }
         return true;
-    }
-
-    @Test
-    public void lengthOfLongestSubstringWorks() {
-        int res = lengthOfLongestSubstring("hijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789hijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789hijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789hijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789hijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789hijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-        assertTrue(res == 55);
-    }
-
-    // 3 - Sliding window approach
-    public static int lengthOfLongestSubstring(String s) {
-        int anchor = 0, max = 0;
-        int[] memo = new int[256]; // 1-index
-        char[] chars = s.toCharArray();
-        for (int i = 0; i < chars.length; i++) {
-            if (memo[chars[i]] > 0 && memo[chars[i]] - 1 >= anchor) {
-                anchor = memo[chars[i]];
-            }
-            memo[chars[i]] = i + 1;
-            max = Math.max(i - anchor + 1, max);
-        }
-        return max;
     }
 
     // From Leetcode

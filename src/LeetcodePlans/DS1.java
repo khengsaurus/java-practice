@@ -1,7 +1,9 @@
 package LeetcodePlans;
 
 import org.junit.Test;
+
 import java.util.*;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -24,6 +26,13 @@ public class DS1 {
             this.left = left;
             this.right = right;
         }
+    }
+
+    // 112
+    public boolean hasPathSum(TreeNode root, int targetSum) {
+        if (root == null) return false;
+        if (root.left == null && root.right == null) return root.val == targetSum;
+        return hasPathSum(root.left, targetSum - root.val) || hasPathSum(root.right, targetSum - root.val);
     }
 
     //    101
@@ -54,14 +63,13 @@ public class DS1 {
         while (!toVisit.isEmpty()) {
             List<Integer> level = new ArrayList<>();
             int size = toVisit.size();
-            while (size > 0) {
+            while (size-- > 0) {
                 TreeNode curr = toVisit.poll();
                 if (curr != null) {
                     level.add(curr.val);
                     if (curr.left != null) toVisit.add(curr.left);
                     if (curr.right != null) toVisit.add(curr.right);
                 }
-                size--;
             }
             levels.add(level);
         }

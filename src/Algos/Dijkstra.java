@@ -1,7 +1,12 @@
+package Algos;
+
 import java.util.Arrays;
 
+/**
+ * Shortest path from source to all vertices
+ * https://www.geeksforgeeks.org/dijkstras-shortest-path-algorithm-greedy-algo-7/
+ */
 class Dijkstra {
-    //    From https://www.geeksforgeeks.org/dijkstras-shortest-path-algorithm-greedy-algo-7/
     int minDistance(int[] dist, boolean[] visited) {
         int min = Integer.MAX_VALUE, min_index = -1;
 
@@ -25,7 +30,6 @@ class Dijkstra {
         int[] dist = new int[nodes];
         boolean[] visited = new boolean[nodes];
         Arrays.fill(dist, Integer.MAX_VALUE);
-
         dist[src] = 0;
 
         for (int count = 0; count < nodes - 1; count++) {
@@ -37,9 +41,7 @@ class Dijkstra {
                 if (!visited[v] && graph[u][v] != 0 && dist[u] != Integer.MAX_VALUE) {
                     // And total weight of path from src to v through u is smaller than current value of dist[v]
                     int distToUThenV = dist[u] + graph[u][v];
-                    if(distToUThenV < dist[v]) {
-                        dist[v] = distToUThenV;
-                    }
+                    if (distToUThenV < dist[v]) dist[v] = distToUThenV;
                 }
         }
         printSolution(dist);

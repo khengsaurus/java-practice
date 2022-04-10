@@ -1,16 +1,194 @@
 import java.util.*;
 
-class GraphQns {
+class GraphQns implements HasDirs {
     public static void main(String[] args) {
-//        List<List<Integer>> res = allPathsSourceTarget(new int[][]{{1, 2}, {3}, {3}, {}});
-//        List<List<Integer>> res = allPathsSourceTarget(new int[][]{{4, 3, 1}, {3, 2, 4}, {3}, {4}, {}});
-//        System.out.println(res);
-        int res = findCircleNum(new int[][]{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 1}, {0, 0, 1, 1}});
+        GraphQns sln = new GraphQns();
+        boolean res = sln.canFinish(20, new int[][]{{0, 10}, {3, 18}, {5, 5}, {6, 11}, {11, 14}, {13, 1}, {15, 1}, {17, 4}});
         System.out.println(res);
     }
 
-    final static int[][] fourDirs = new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
-    final static int[][] eightDirs = new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, 1}, {1, -1}, {-1, -1}};
+    public GraphQns() {
+    }
+
+    //    207. Course Schedule
+    public boolean canFinish(int numCourses, int[][] prerequisites) {
+        Map<Integer, List<Integer>> courseReqs = new HashMap<>();
+        for (int[] courseReq : prerequisites) {
+            List<Integer> reqs = courseReqs.getOrDefault(courseReq[0], new ArrayList<>());
+            reqs.add(courseReq[1]);
+            courseReqs.put(courseReq[0], reqs);
+        }
+        if (courseReqs.size() > numCourses) return false;
+        for (int course : courseReqs.keySet().stream().toList()) {
+            if (!dfs207(course, courseReqs, new HashSet<Integer>())) return false;
+            courseReqs.remove(course, null);
+        }
+        return true;
+    }
+
+    public boolean dfs207(int course, Map<Integer, List<Integer>> courseReqs, Set<Integer> visited) {
+        if (visited.contains(course)) return false;
+        List<Integer> preReqs = courseReqs.get(course);
+        if (preReqs == null || preReqs.isEmpty()) return true;
+        visited.add(course);
+        for (int prereq : preReqs) {
+            if (!dfs207(prereq, courseReqs, visited)) return false;
+            courseReqs.put(prereq, null);
+        }
+        visited.remove(course);
+        return true;
+    }
+
+    //    79
+    public boolean exist(char[][] board, String word) {
+        int rows = board.length, cols = board[0].length;
+        char startingChar = word.charAt(0);
+        for (int row = 0; row < board.length; row++) {
+            for (int col = 0; col < board[0].length; col++) {
+                if (board[row][col] == startingChar) {
+                    boolean[][] visited = new boolean[rows][cols];
+                    if (dfs79(board, visited, row, col, word, 0)) return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean dfs79(char[][] board, boolean[][] visited, int row, int col, String word, int curr) {
+        if (curr == word.length() - 1) return true;
+        visited[row][col] = true;
+        char nextChar = word.charAt(curr + 1);
+        for (int[] dir : fourDirs) {
+            int nextRow = row + dir[0], nextCol = col + dir[1];
+            if (nextRow < 0 || nextCol < 0 || nextRow >= board.length || nextCol >= board[0].length || visited[nextRow][nextCol])
+                continue;
+            if (board[nextRow][nextCol] == nextChar && dfs79(board, visited, nextRow, nextCol, word, curr + 1)) {
+                return true;
+            }
+        }
+        visited[row][col] = false;
+        return false;
+    }
+
+    // 1466
+    public int minReorder(int n, int[][] connections) {
+        Map<Integer, List<Integer>> roadsTo = new HashMap<>();
+        Map<Integer, List<Integer>> roadsFrom = new HashMap<>();
+        for (int[] road : connections) {
+            int roadFrom = road[0], roadTo = road[1];
+            roadsFrom.computeIfAbsent(roadFrom, k -> new ArrayList<>());
+            roadsFrom.get(roadFrom).add(roadTo);
+            roadsTo.computeIfAbsent(roadTo, k -> new ArrayList<>());
+            roadsTo.get(roadTo).add(roadFrom);
+        }
+        boolean[] parentZero = new boolean[n];
+        parentZero[0] = true;
+        return explore(roadsTo, roadsFrom, parentZero, 0, 0, 0);
+    }
+
+    public int explore(
+            Map<Integer, List<Integer>> roadsTo,
+            Map<Integer, List<Integer>> roadsFrom,
+            boolean[] parentZero,
+            int city, int from, int count) {
+        boolean add = false;
+        for (int c : roadsTo.get(city)) {
+            if (c != from || !parentZero[c]) add = true;
+
+        }
+        return count;
+    }
+
+    //    1129
+    public int[] shortestAlternatingPaths(int n, int[][] redEdges, int[][] blueEdges) {
+        List<Integer>[] reds = new ArrayList[n], blues = new ArrayList[n];
+        for (int[] e : redEdges) {
+            if (reds[e[0]] == null) reds[e[0]] = new ArrayList<>();
+            reds[e[0]].add(e[1]);
+        }
+        for (int[] e : blueEdges) {
+            if (blues[e[0]] == null) blues[e[0]] = new ArrayList<>();
+            blues[e[0]].add(e[1]);
+        }
+
+        Queue<int[]> q = new LinkedList<>();
+        int[] answer = new int[n];
+        Arrays.fill(answer, -1);
+        q.add(new int[]{0, 0});
+        int moves = 0;
+        Set<String> seen = new HashSet<>();
+
+        while (!q.isEmpty()) {
+            int size = q.size();
+            while (size-- > 0) {
+                int[] curr = q.remove();
+                String key = curr[0] + " " + curr[1];
+                if (seen.contains(key)) continue;
+                seen.add(key);
+                if (answer[curr[0]] == -1) answer[curr[0]] = moves;
+
+                if (curr[1] != 1) { // marked red visited
+                    if (reds[curr[0]] != null) {
+                        for (int child : reds[curr[0]]) q.add(new int[]{child, 1});
+                    }
+                }
+                if (curr[1] != 2) { // marked blue visited
+                    if (blues[curr[0]] != null) {
+                        for (int child : blues[curr[0]]) q.add(new int[]{child, 2});
+                    }
+                }
+            }
+            ++moves;
+        }
+        return answer;
+    }
+
+    /**
+     * 1376 - Time Needed to Inform All Employees
+     * Shit this solution is smartttt (not mine)
+     * If i's manager != -1, compute & update the inform time of i
+     * -> i.e. the inform time of i's manager + i's inform time
+     * Set i's manager to be -1 (caching) and return ^
+     */
+    public static int numOfMinutes(int n, int headID, int[] manager, int[] informTime) {
+        int res = 0;
+        for (int i = 0; i < n; i++)
+            res = Math.max(res, dfs1376(i, manager, informTime));
+        return res;
+    }
+
+    public static int dfs1376(int i, int[] manager, int[] informTime) {
+        if (manager[i] != -1) {
+            informTime[i] += dfs1376(manager[i], manager, informTime);
+            manager[i] = -1;
+        }
+        return informTime[i];
+    }
+
+    /**
+     * 1319 - Number of Operations to Make Network Connected
+     * Union find
+     */
+    public int makeConnected(int n, int[][] connections) {
+        int[] parents = new int[n];
+        for (int i = 0; i < n; i++) parents[i] = i;
+        int m = connections.length, islands = 0, extraEdge = 0;
+        for (int i = 0; i < m; i++) {
+            int p1 = findParent1319(parents, connections[i][0]);
+            int p2 = findParent1319(parents, connections[i][1]);
+            if (p1 == p2) extraEdge++; // they are already indirectly connected, hence edge is not required
+            else parents[p1] = p2;
+        }
+        for (int i = 0; i < n; i++) if (parents[i] == i) islands++;
+        return (extraEdge >= islands - 1) ? islands - 1 : -1;
+    }
+
+    public int findParent1319(int[] par, int i) {
+        if (par[i] != i) {
+            par[i] = findParent1319(par, par[i]);
+        }
+        return par[i];
+    }
 
     //    547
     public static int findCircleNum(int[][] isConnected) {
@@ -98,7 +276,7 @@ class GraphQns {
         int count = 0;
         while (!toVisit.isEmpty()) {
             int size = toVisit.size();
-            while (size > 0) {
+            while (size-- > 0) {
                 int[] curr = toVisit.poll();
                 int row = curr[0], col = curr[1], val = grid[row][col];
                 if (val == 3) continue;
@@ -109,7 +287,6 @@ class GraphQns {
                         toVisit.add(new int[]{row + dir[0], col + dir[1]});
                     }
                 }
-                size--;
             }
             count++;
         }
@@ -232,7 +409,7 @@ class GraphQns {
 
         while (!toVisit.isEmpty()) {
             int size = toVisit.size();
-            while (size > 0) {
+            while (size-- > 0) {
                 int[] curr = toVisit.poll();
                 for (int[] dir : fourDirs) {
                     int newI = curr[0] + dir[0];
@@ -242,7 +419,6 @@ class GraphQns {
                     dist[newI][newJ] = d;
                     toVisit.add(new int[]{newI, newJ});
                 }
-                size--;
             }
             d++;
         }
@@ -482,43 +658,6 @@ class GraphQns {
         convertToSea(grid, row, col - 1);
     }
 
-    //    207
-    public static boolean canFinish(int numCourses, int[][] prerequisites) {
-//        Create adjacency-list representation
-        Map<Integer, List<Integer>> courseAndPreReqs = new HashMap<>();
-        for (int[] c : prerequisites) {
-            if (!courseAndPreReqs.containsKey(c[0])) {
-                courseAndPreReqs.put(c[0], new ArrayList<>(Arrays.asList(c[1])));
-            } else {
-                courseAndPreReqs.get(c[0]).add(c[1]);
-            }
-        }
-        if (courseAndPreReqs.size() > numCourses) return false;
-
-//        Call DFS
-        Set<Integer> visited = new HashSet<>();
-        for (int course : courseAndPreReqs.keySet()) {
-            if (!canStudyDfs(course, courseAndPreReqs, visited)) return false;
-            courseAndPreReqs.get(course).clear();
-        }
-        return true;
-    }
-
-    public static boolean canStudyDfs(int course, Map<
-            Integer, List<Integer>> courseAndPreReqs, Set<Integer> visited) {
-        if (visited.contains(course)) return false;
-        List<Integer> preReqs = courseAndPreReqs.get(course);
-        if (preReqs == null || preReqs.size() == 0) return true;
-        visited.add(course);
-        for (int preReq : preReqs) {
-            if (!canStudyDfs(preReq, courseAndPreReqs, visited)) return false;
-        }
-        visited.remove(course);
-        return true;
-    }
-
-    ;
-
     //    130
     public void solve(char[][] board) {
         int m = board.length;
@@ -586,52 +725,6 @@ class GraphQns {
             fill(image, sr + 1, sc, oldColor, newColor, m, n);
             fill(image, sr, sc - 1, oldColor, newColor, m, n);
             fill(image, sr, sc + 1, oldColor, newColor, m, n);
-        }
-    }
-
-    public static boolean isValidBST(TreeNode root) {
-        if ((root.left != null && root.left.val >= root.val) || (root.right != null && root.right.val <= root.val)) {
-            return false;
-        }
-        return (root.left == null || isValidBST(root.left)) && (root.right == null || isValidBST(root.right));
-    }
-
-    public static List<Integer> traversal(TreeNode root) {
-        List<Integer> rv = new ArrayList<>();
-        if (root != null) dfs(root, rv);
-        return rv;
-    }
-
-    private static void dfs(TreeNode node, List<Integer> rv) {
-//        rv.add(node.val); // <-- preOrder
-        if (node.left != null) {
-            dfs(node.left, rv);
-        }
-        rv.add(node.val); // <-- inOrder
-        if (node.right != null) {
-            dfs(node.right, rv);
-        }
-//        rv.add(node.val); // <-- postOrder
-    }
-
-    public GraphNode cloneGraph(GraphNode node) {
-        if (node == null) return null;
-        GraphNode copy = new GraphNode(node.val);
-        GraphNode[] visited = new GraphNode[101];
-        dfs(node, copy, visited);
-        return copy;
-    }
-
-    public void dfs(GraphNode node, GraphNode copy, GraphNode[] visited) {
-        visited[copy.val] = copy;
-        for (GraphNode n : node.neighbors) {
-            if (visited[n.val] == null) {
-                GraphNode newNode = new GraphNode(n.val);
-                copy.neighbors.add(newNode);
-                dfs(n, newNode, visited);
-            } else {
-                copy.neighbors.add(visited[n.val]);
-            }
         }
     }
 }

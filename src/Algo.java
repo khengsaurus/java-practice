@@ -1,7 +1,7 @@
 import java.lang.reflect.Array;
 import java.util.*;
 
-public class Algo {
+public class Algo implements HasDirs {
     public static void main(String[] args) {
 //        List<List<Integer>> l = permute(new int[]{1, 2, 3});
 //        for (List<Integer> _l : l) {
@@ -11,8 +11,6 @@ public class Algo {
         System.out.println(res);
     }
 
-    final static int[][] fourDirs = new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
-    final static int[][] eightDirs = new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, 1}, {1, -1}, {-1, -1}};
     static List<List<Integer>> result;
     static List<String> strRes;
 
@@ -179,7 +177,7 @@ public class Algo {
         while (!toVisit.isEmpty()) {
             boolean didRot = false;
             int size = toVisit.size();
-            while (size > 0) {
+            while (size-- > 0) {
                 int[] curr = toVisit.poll();
                 int i = curr[0], j = curr[1];
                 if (grid[i][j] == 1) {
@@ -192,7 +190,6 @@ public class Algo {
                         }
                     }
                 }
-                size--;
             }
             if (didRot) count++;
         }

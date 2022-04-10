@@ -5,22 +5,24 @@ import java.util.TreeMap;
 
 public class LinkedListQns {
     public static void main(String[] args) {
-//        ListNode list1 = newLinkedList(new int[]{1, 2, 3, 4, 5}, -1);
-//        ListNode list2 = newLinkedList(new int[]{3, 4, 11}, -1);
-//        ListNode list3 = newLinkedList(new int[]{1, 2}, -1);
-        ListNode l1 = new ListNode(1);
-        ListNode l2 = new ListNode(2);
-//        ListNode l3 = new ListNode(3);
-//        ListNode l4 = new ListNode(4);
-//        ListNode l5 = new ListNode(5);
-//        ListNode l6 = new ListNode(6);
-        l1.next = l2;
-//        l2.next = l3;
-//        l3.next = l4;
-//        l4.next = l5;
-//        l5.next = l6;
-        l1 = removeNthFromEnd2(l1, 2);
-        System.out.println(l1);
+        ListNode a = new ListNode(1, new ListNode(2, new ListNode(3, new ListNode(4, new ListNode(5)))));
+        swapNodes(a, 2);
+    }
+
+    //    1721
+    public static ListNode swapNodes(ListNode head, int k) {
+        if (head == null || head.next == null) return head;
+        ListNode kth = head, kthFromBack = head, fast = head.next;
+        int count = 1;
+        while (fast != null) {
+            if (count == k - 1) kth = fast;
+            fast = fast.next;
+            if (count++ >= k) kthFromBack = kthFromBack.next;
+        }
+        int t = kthFromBack.val;
+        kthFromBack.val = kth.val;
+        kth.val = t;
+        return head;
     }
 
     // 83

@@ -6,10 +6,98 @@ import static org.junit.Assert.assertTrue;
 
 public class DPQns {
     public static void main(String[] args) {
-//        int res = jumpBetter(new int[]{2, 5, 1, 0, 0, 0});
-//        int res = maxSubarraySumCircular(new int[]{10, -3, -2, -3});
-//        int res = getMaxLen(new int[]{1, 1, -1, 1, -1, 1, 1, 0, 1, -1, -1});
-//        int res = maxScoreSightseeingPair(new int[]{3, 7, 2, 3});
+
+    }
+
+    // 42 - Trapping Rain Water
+    // https://www.youtube.com/watch?v=ZI2z5pq0TqA
+    public int trap(int[] height) {
+        if (height.length <= 2) return 0;
+        int l = 0, r = height.length - 1, total = 0;
+        int maxLeft = height[l], maxRight = height[r];
+        while (l < r) {
+            if (maxLeft < maxRight) {
+                l++;
+                maxLeft = Math.max(maxLeft, height[l]); // smart. avoid another check
+                total += maxLeft - height[l];
+            } else {
+                r--;
+                maxRight = Math.max(maxRight, height[r]);
+                total += maxRight - height[r];
+            }
+        }
+        return total;
+    }
+
+    /**
+     * 1014 - Best scoring scenic pair
+     * Break the problem down! Do the math! Consider how to dp it!
+     */
+    public static int maxScoreSightseeingPair(int[] values) {
+        int maxLeft = values[0], max = 0;
+        for (int i = 1; i < values.length; i++) {
+            max = Math.max(max, maxLeft + values[i] - i);
+            maxLeft = Math.max(maxLeft, i + values[i]);
+        }
+        return max;
+    }
+
+    /**
+     * 309 - Best Time to Buy and Sell Stock with Cooling Period
+     * https://www.youtube.com/watch?v=I7j0F7AHpb8
+     * State based decision:
+     * canBuy -> buy (then canSell next day) or noAction (then canBuy next day)
+     * canSell -> sell (then canBuy the day after) or noAction (then canSell next day)
+     */
+    static int[] buy, sell;
+
+    public static int maxProfit(int[] prices) {
+        buy = new int[prices.length];
+        sell = new int[prices.length];
+        return dfs714(prices, 0, true);
+    }
+
+    public static int dfs714(int[] prices, int day, boolean canBuy) {
+        if (day >= prices.length) return 0;
+        if (canBuy) {
+            if (buy[day] != 0) return buy[day];
+        } else if (sell[day] != 0) {
+            return sell[day];
+        }
+        int noAction = dfs714(prices, day + 1, canBuy);
+        if (canBuy) {
+            buy[day] = Math.max(noAction, dfs714(prices, day + 1, false) - prices[day]);
+            return buy[day];
+        } else {
+            sell[day] = Math.max(noAction, dfs714(prices, day + 2, true) + prices[day]);
+            return sell[day];
+        }
+    }
+
+    //    120
+    public int minimumTotal(List<List<Integer>> triangle) {
+        int rows = triangle.size();
+        int first = triangle.get(0).get(0);
+        if (rows == 1) return first;
+        int[][] dp = new int[rows][rows];
+        dp[0][0] = first;
+        for (int row = 1; row < rows; row++) {
+            for (int col = 0; col <= row; col++) {
+                int currVal = triangle.get(row).get(col);
+                if (col == 0) {
+                    dp[row][col] = currVal + dp[row - 1][0];
+                } else if (col == row) {
+                    dp[row][col] = currVal + dp[row - 1][col - 1];
+                } else {
+                    dp[row][col] = currVal + Math.min(dp[row - 1][col - 1], dp[row - 1][col]);
+                }
+            }
+        }
+        int min = Integer.MAX_VALUE;
+        for (int i : dp[rows - 1]) {
+            min = Math.min(min, i);
+        }
+        return min;
     }
 
     /**
