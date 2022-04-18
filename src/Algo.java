@@ -3,114 +3,118 @@ import java.util.*;
 
 public class Algo implements HasDirs {
     public static void main(String[] args) {
-//        List<List<Integer>> l = permute(new int[]{1, 2, 3});
-//        for (List<Integer> _l : l) {
-//            System.out.println(_l);
-//        }
-        List<String> res = letterCasePermutation("sad");
-        System.out.println(res);
-    }
-
-    static List<List<Integer>> result;
-    static List<String> strRes;
-
-    //    784
-    public static List<String> letterCasePermutation(String s) {
-        char[] chars = s.toCharArray();
-        strRes = new ArrayList<>();
-        recurse784(chars, 0);
-        return strRes;
-    }
-
-    public static void recurse784(char[] chars, int start) {
-        if (start == chars.length) {
-            strRes.add(new String(chars));
-            return;
-        }
-        char c = chars[start];
-        if (Character.isDigit(c)) {
-            recurse784(chars, start + 1);
-        } else {
-            chars[start] = Character.toLowerCase(c);
-            recurse784(chars, start + 1);
-            chars[start] = Character.toUpperCase(c);
-            recurse784(chars, start + 1);
-        }
-    }
-
-    //    46
-    public static List<List<Integer>> permute(int[] nums) {
-        result = new LinkedList<>();
-        Deque<Integer> combo = new LinkedList<>();
-        boolean[] used = new boolean[nums.length];
-        backtrack46(nums, combo, used);
-        return result;
-    }
-
-    public static void backtrack46(int[] nums, Deque<Integer> combo, boolean[] used) {
-        if (combo.size() == nums.length) {
-            result.add(new ArrayList<>(combo));
-            return;
-        }
-        for (int i = 0; i < nums.length; i++) {
-            if (used[i]) continue;
-            used[i] = true;
-            combo.offerLast(nums[i]);
-            backtrack46(nums, combo, used);
-            used[i] = false;
-            combo.pollLast();
-        }
-    }
-
-    public static void swap(int[] nums, int i, int j) {
-        int t = nums[i];
-        nums[i] = nums[j];
-        nums[j] = t;
     }
 
     /**
-     * 77 - DECISION TREE, BACKTRACKING
+     * 784. Letter Case Permutation
+     * Backtracking
+     */
+    public List<String> letterCasePermutation(String s) {
+        Backtrack784 ans = new Backtrack784(s);
+        return ans.getList();
+    }
+
+    class Backtrack784 {
+        private List<String> list = new ArrayList<>();
+
+        public Backtrack784(String s) {
+            backtrack784(s.toCharArray(), 0);
+        }
+
+        public List<String> getList() {
+            return this.list;
+        }
+
+        void backtrack784(char[] chars, int i) {
+            if (i == chars.length) {
+                list.add(new String(chars));
+                return;
+            }
+            if (Character.isDigit(chars[i])) {
+                backtrack784(chars, i + 1);
+            } else {
+                chars[i] = Character.toUpperCase(chars[i]);
+                backtrack784(chars, i + 1);
+                chars[i] = Character.toLowerCase(chars[i]);
+                backtrack784(chars, i + 1);
+            }
+        }
+    }
+
+    //    46. Permutations
+    public List<List<Integer>> permute(int[] nums) {
+        Backtrack46 ans = new Backtrack46(nums);
+        return ans.getResult();
+    }
+
+    class Backtrack46 {
+        private List<List<Integer>> result;
+
+        public Backtrack46(int[] nums) {
+            result = new LinkedList<>();
+            Deque<Integer> combo = new LinkedList<>();
+            boolean[] used = new boolean[nums.length];
+            backtrack(nums, combo, used);
+        }
+
+        public List<List<Integer>> getResult() {
+            return this.result;
+        }
+
+        public void backtrack(int[] nums, Deque<Integer> combo, boolean[] used) {
+            if (combo.size() == nums.length) {
+                result.add(new ArrayList<>(combo));
+                return;
+            }
+            for (int i = 0; i < nums.length; i++) {
+                if (used[i]) continue;
+                used[i] = true;
+                combo.offerLast(nums[i]);
+                backtrack(nums, combo, used);
+                used[i] = false;
+                combo.pollLast();
+            }
+        }
+    }
+
+    /**
+     * 77. Combinations
+     * Backtracking + Decision tree
      * Base: n, Height of decision tree: k
      * Upperbound: O(n^k)
      */
-    public static List<List<Integer>> combine2(int n, int k) {
-        result = new LinkedList<>();
-        Deque<Integer> comb = new LinkedList<>();
-        for (int i = 1; i <= n; i++) {
-            comb.offerLast(i);
-            backTrack2(i + 1, n, k - 1, comb);
-            comb.pollLast();
-        }
-        return result;
+    public List<List<Integer>> combine(int n, int k) {
+        Backtrack77 ans = new Backtrack77(n, k);
+        return ans.getResult();
     }
 
-    private static void backTrack2(int start, int n, int remaining, Deque<Integer> currComb) {
-        if (remaining == 0) {
-            result.add(new LinkedList(currComb));
-            return;
-        }
-        for (int i = start; i <= n - remaining + 1; i++) {
-            currComb.offerLast(i);
-            backTrack2(i + 1, n, remaining - 1, currComb);
-            currComb.pollLast();
-        }
-    }
+    class Backtrack77 {
+        private List<List<Integer>> result;
 
-    public static List<List<Integer>> combine(int n, int k) {
-        List<List<Integer>> combs = new ArrayList<List<Integer>>();
-        backtrack(combs, new ArrayList<Integer>(), 1, n, k);
-        return combs;
-    }
-
-    public static void backtrack(List<List<Integer>> combs, List<Integer> comb, int start, int n, int k) {
-        if (comb.size() == k) {
-            combs.add(new ArrayList<Integer>(comb)); // create new array here, else this will be a reference
-            return;
+        public Backtrack77(int n, int k) {
+            this.result = new ArrayList<>();
+            Deque<Integer> comb = new LinkedList<>();
+            for (int i = 1; i <= n; i++) {
+                comb.offerLast(i);
+                backtrack(i + 1, n, k - 1, comb);
+                comb.pollLast();
+            }
         }
-        for (int i = start; i <= n; i++) { // the decision tree
-            comb.add(i); // decision: use i
-            backtrack(combs, comb, i + 1, n, k); // explore all options with i
-            comb.remove(comb.size() - 1); // remove i
+
+        public List<List<Integer>> getResult() {
+            return this.result;
+        }
+
+        private void backtrack(int start, int n, int remaining, Deque<Integer> currComb) {
+            if (remaining == 0) {
+                result.add(new LinkedList(currComb)); // create new obj here, else this will be a reference
+                return;
+            }
+            for (int i = start; i <= n - remaining + 1; i++) { // the decision tree
+                currComb.offerLast(i);
+                backtrack(i + 1, n, remaining - 1, currComb); // explore all options with i
+                currComb.pollLast(); // remove i
+            }
         }
     }
 

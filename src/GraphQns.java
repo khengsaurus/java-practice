@@ -2,12 +2,101 @@ import java.util.*;
 
 class GraphQns implements HasDirs {
     public static void main(String[] args) {
-        GraphQns sln = new GraphQns();
-        boolean res = sln.canFinish(20, new int[][]{{0, 10}, {3, 18}, {5, 5}, {6, 11}, {11, 14}, {13, 1}, {15, 1}, {17, 4}});
+//        GraphQns sln = new GraphQns();
+        int res = longestIncreasingPath(new int[][]{{9, 9, 4}, {6, 6, 8}, {2, 1, 1}});
         System.out.println(res);
     }
 
     public GraphQns() {
+    }
+
+    /**
+     * 329. Longest Increasing Path in a Matrix
+     * Can be done via top sort/bfs too
+     */
+    public static int longestIncreasingPath(int[][] matrix) {
+        Dfs329 dfs = new Dfs329(matrix);
+        return dfs.getCount();
+    }
+
+    static class Dfs329 {
+        private int rows, cols, count;
+
+        public Dfs329(int[][] matrix) {
+            this.rows = matrix.length;
+            this.cols = matrix[0].length;
+            if (this.rows == 0) {
+                this.count = 0;
+            } else {
+                int[][] cache = new int[rows][cols];
+                for (int row = 0; row < rows; row++) {
+                    for (int col = 0; col < cols; col++) {
+                        this.count = Math.max(this.count, dfs329(matrix, row, col, cache));
+                    }
+                }
+            }
+        }
+
+        private int dfs329(int[][] matrix, int row, int col, int[][] cache) {
+            if (cache[row][col] != 0) return cache[row][col];
+            for (int[] dir : fourDirs) {
+                int newX = row + dir[0], newY = col + dir[1];
+                if (newX < 0 || newX >= rows || newY < 0 || newY >= cols) continue;
+                if (matrix[newX][newY] > matrix[row][col]) {
+                    cache[row][col] = Math.max(cache[row][col], dfs329(matrix, newX, newY, cache));
+                }
+            }
+            return ++cache[row][col];
+        }
+
+        public int getCount() {
+            return this.count;
+        }
+    }
+
+    /**
+     * 289. Game of Life
+     * Any live cell with fewer than two live neighbors dies as if caused by under-population.
+     * Any live cell with two or three live neighbors lives on to the next generation.
+     * Any live cell with more than three live neighbors dies, as if by over-population.
+     * Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.
+     */
+    public void gameOfLife(int[][] board) {
+        int rows = board.length, cols = board[0].length;
+        if (rows == 1 && cols == 1) {
+            board[0][0] = 0;
+            return;
+        }
+        int[][] memo = new int[rows][cols];
+
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                int n = countLiveNeighbors(board, r, c);
+                if (board[r][c] == 0) {
+                    if (n == 3) memo[r][c] = 1;
+                } else {
+                    if (n < 2 || n > 3) {
+                        memo[r][c] = -1;
+                    }
+                }
+            }
+        }
+
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                board[r][c] += memo[r][c];
+            }
+        }
+    }
+
+    public int countLiveNeighbors(int[][] board, int row, int col) {
+        int count = 0;
+        for (int[] dir : eightDirs) {
+            int newX = row + dir[0], newY = col + dir[1];
+            if (newX < 0 || newX >= board.length || newY < 0 || newY >= board[0].length) continue;
+            count += board[newX][newY];
+        }
+        return count;
     }
 
     //    207. Course Schedule
@@ -687,8 +776,10 @@ class GraphQns implements HasDirs {
         clearFromSides(board, row, col - 1);
     }
 
-    //    200
-//    Manipulate the problem - reduce all '1' to '0' except for the seed island, possible as islands are not connected
+    /**
+     * 200. Number of Islands
+     * Manipulate the problem - reduce all '1' to '0' except for the seed island, possible as islands are not connected
+     */
     public int numIslands(char[][] grid) {
         int count = 0;
         for (int row = 0; row < grid.length; row++) {

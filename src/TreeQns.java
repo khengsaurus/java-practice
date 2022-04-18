@@ -2,6 +2,81 @@ import java.util.*;
 
 public class TreeQns {
 
+    //    230. Kth Smallest Element in a BST
+    public int kthSmallest(TreeNode root, int k) {
+        Stack<TreeNode> stack = new Stack<>();
+        while (root != null) {
+            stack.push(root);
+            root = root.left;
+        }
+        while (k != 0) {
+            TreeNode n = stack.pop();
+            k--;
+            if (k == 0) return n.val;
+            TreeNode right = n.right;
+            while (right != null) {
+                stack.push(right);
+                right = right.left;
+            }
+        }
+        return -1;
+    }
+
+    int res = -1;
+    int globalK = 0;
+
+    public int kthSmallestInOrder(TreeNode root, int k) {
+        globalK = k;
+        inOrder(root);
+        return res;
+    }
+
+    public void inOrder(TreeNode root) {
+        if (root == null) return;
+        inOrder(root.left);
+
+        if (globalK-- == 1) {
+            res = root.val;
+            return;
+        }
+
+        inOrder(root.right);
+    }
+
+    //    236. Lowest Common Ancestor of a Binary Tree
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        if (root == null || root == p || root == q) return root;
+        TreeNode left = lowestCommonAncestor(root.left, p, q);
+        TreeNode right = lowestCommonAncestor(root.right, p, q);
+        if (left != null && right != null) return root;
+        if (left == null) return right;
+        return left;
+    }
+
+    //    897. Increasing Order Search Tree
+    public TreeNode increasingBST(TreeNode root) {
+        if (root == null) return null;
+        Queue<TreeNode> queue = new LinkedList<>();
+        inOrder(root, queue);
+        TreeNode curr = queue.poll();
+        curr.left = null;
+        root = curr;
+        while (!queue.isEmpty()) {
+            curr.right = queue.poll();
+            curr = curr.right;
+            curr.left = null;
+        }
+        curr.right = null;
+        return root;
+    }
+
+    public void inOrder(TreeNode root, Queue<TreeNode> queue) {
+        if (root == null) return;
+        inOrder(root.left, queue);
+        queue.add(root);
+        inOrder(root.right, queue);
+    }
+
     //    124
     int globalMax;
 
@@ -59,23 +134,6 @@ public class TreeQns {
         return newNode;
     }
 
-    /**
-     * Brilliant outside-of-the-box solution
-     */
-    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
-        while ((root.val - p.val) * (root.val - q.val) > 0)
-            root = p.val < root.val ? root.left : root.right;
-        return root;
-    }
-
-    public boolean containsChild(TreeNode root, int val) {
-        if (root == null) return false;
-        if (root.val == val) return true;
-        return (root.val > val)
-                ? containsChild(root.left, val)
-                : containsChild(root.right, val);
-    }
-
     //    653
     public boolean findTarget(TreeNode root, int k) {
         Set<Integer> set = new HashSet<>();
@@ -101,7 +159,6 @@ public class TreeQns {
     }
 
     // 802 - Find Eventual Safe States
-    // 86% & 60% but I just bashed this out without thinking, don't try to understand it @future me
     public List<Integer> eventualSafeNodes(int[][] graph) {
         int[] safe = new int[graph.length];
         List<Integer> s = new ArrayList<>();

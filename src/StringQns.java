@@ -8,7 +8,6 @@ import static org.junit.Assert.assertTrue;
 
 public class StringQns {
     public static void main(String[] args) {
-        System.out.println(countSubstrings("ababa"));
     }
 
     //    647. Palindromic Substrings
@@ -35,36 +34,29 @@ public class StringQns {
         if (s == null || s.isEmpty() || t == null || t.isEmpty()) return "";
         int tLen = t.length(), sLen = s.length();
         if (tLen > sLen) return "";
-        int i = 0, j = 0;
+
+        int left = 0, right = 0, found = 0, len = Integer.MAX_VALUE;
         int[] tMap = new int[256], sMap = new int[256], coors = new int[]{-1, -1};
-        for (int k = 0; k < t.length(); k++) {
-            tMap[t.charAt(k)]++;
-        }
-        int found = 0, len = Integer.MAX_VALUE;
-        while (j < sLen) {
+        for (int k = 0; k < t.length(); k++) tMap[t.charAt(k)]++;
+
+        while (right < sLen) {
             if (found < tLen) {
-                int c = s.charAt(j);
+                // if the count of that required char <= required count, found ++
+                int c = s.charAt(right++);
                 if (tMap[c] > 0) {
-                    sMap[c]++;
-                    if (sMap[c] <= tMap[c]) {
-                        found++;
-                    }
+                    if (++sMap[c] <= tMap[c]) found++;
                 }
-                j++;
             }
             while (found == tLen) {
-                if (j - i < len) {
-                    len = j - i;
-                    coors = new int[]{i, j};
+                if (right - left < len) {
+                    len = right - left;
+                    coors = new int[]{left, right};
                 }
-                int c = s.charAt(i);
+                int c = s.charAt(left);
                 if (tMap[c] > 0) {
-                    sMap[c]--;
-                    if (sMap[c] < tMap[c]) {
-                        found--;
-                    }
+                    if (--sMap[c] < tMap[c]) found--;
                 }
-                i++;
+                left++;
             }
         }
         return coors[0] > -1 ? s.substring(coors[0], coors[1]) : "";

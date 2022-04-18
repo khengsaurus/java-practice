@@ -1,9 +1,64 @@
 import java.util.*;
 
-public class TopSort {
+public class TopSort implements HasDirs {
     public static void main(String[] args) {
-        List<Integer> roots = findMinHeightTrees(7, new int[][]{{3, 0}, {3, 1}, {3, 2}, {3, 4}, {4, 5}, {5, 6}});
-        System.out.println(roots);
+//        List<Integer> roots = findMinHeightTrees(7, new int[][]{{3, 0}, {3, 1}, {3, 2}, {3, 4}, {4, 5}, {5, 6}});
+//        System.out.println(roots);
+        longestIncreasingPath(new int[][]{{9, 9, 4}, {6, 6, 8}, {2, 1, 1}});
+    }
+
+    /**
+     * 329. Longest Increasing Path in a Matrix
+     * Done via bfs too
+     */
+    public static int longestIncreasingPath(int[][] matrix) {
+        int m = matrix.length, n = matrix[0].length;
+
+        int[][] inDegree = new int[m][n];
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                for (int[] dir : fourDirs) {
+                    int nx = i + dir[0];
+                    int ny = j + dir[1];
+                    if (nx >= 0 && nx < m && ny >= 0 && ny < n) {
+                        if (matrix[nx][ny] > matrix[i][j]) inDegree[nx][ny]++;
+                    }
+                }
+            }
+        }
+
+
+        Queue<int[]> queue = new LinkedList<>();
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (inDegree[i][j] == 0) queue.add(new int[]{i, j});
+            }
+        }
+
+        int length = 0;
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {
+                int[] cur = queue.poll();
+                int x = cur[0], y = cur[1];
+
+                for (int[] dir : fourDirs) {
+                    int nx = x + dir[0], ny = y + dir[1];
+                    if (nx >= 0 && nx < m && ny >= 0 && ny < n) {
+                        /**
+                         * Note that inDegree[x][y] is zero
+                         * Only progress to the next greater node if its value is 0
+                         */
+                        if (matrix[x][y] < matrix[nx][ny]) {
+                            if (--inDegree[nx][ny] == 0) queue.offer(new int[]{nx, ny});
+                        }
+                    }
+                }
+            }
+            length++;
+        }
+
+        return length;
     }
 
     /**

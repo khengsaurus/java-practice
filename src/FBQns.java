@@ -2,13 +2,6 @@ import java.util.*;
 
 public class FBQns {
     public static void main(String[] args) {
-        long res = getArtisticPhotographCount(9, "PPBBAPPBB", 1, 2);
-//        long res = getArtisticPhotographCount(5, "APABA", 1, 2);
-//        int res = getMaximumEatenDishCount(6, new int[]{1, 2, 3, 3, 2, 1}, 1);
-//        long res = getMinCodeEntryTime(4999999, 5, new int[]{25000001, 1, 25000000, 2, 25000000});
-//        long res = getSeconds(1, 25000000, 49999990);
-//        long res = getSeconds(1, 7, 9);
-        System.out.println(res);
     }
 
     public int getUniformIntegerCountInInterval(long A, long B) {
@@ -36,7 +29,7 @@ public class FBQns {
      * X = 1
      * Y = 3
      * Expected Return Value = 3
-     *
+     * <p>
      * N = 5
      * C = APABA
      * X = 1

@@ -6,7 +6,43 @@ import static org.junit.Assert.assertTrue;
 
 public class DPQns {
     public static void main(String[] args) {
+//        int res = coinChange2(new int[]{2, 5}, 11);
+//        System.out.println(res);
+    }
 
+    //    322. Coin Change
+    public int coinChange2(int[] coins, int amount) {
+        int[] dp = new int[amount + 1];
+        Arrays.fill(dp, amount + 1);
+        dp[0] = 0;
+
+        for (int amt = 0; amt <= amount; amt++) {
+            for (int coin : coins) {
+                if (amt >= coin) {
+                    dp[amt] = Math.min(dp[amt], 1 + dp[amt - coin]);
+                }
+            }
+        }
+
+        return dp[amount] > amount ? -1 : dp[amount];
+    }
+
+    public int coinChange(int[] coins, int amount) {
+        if (amount == 0) return 0;
+        if (coins.length == 0) return -1;
+        return dp322(coins, amount, new int[amount + 1]);
+    }
+
+    private int dp322(int[] coins, int amt, int[] memo) {
+        if (amt == 0) return 0;
+        if (memo[amt] != 0) return memo[amt];
+        int min = Integer.MAX_VALUE;
+        for (int coin : coins) {
+            int ways = coin > amt ? -1 : dp322(coins, amt - coin, memo);
+            if (ways >= 0) min = Math.min(min, 1 + ways);
+        }
+        memo[amt] = (min == Integer.MAX_VALUE) ? -1 : min;
+        return memo[amt];
     }
 
     // 42 - Trapping Rain Water
@@ -316,9 +352,7 @@ public class DPQns {
         int[][] dp = new int[weights.length + 1][maxWeight + 1];
         for (int w = 1; w <= weights.length; w++) { // rows
             for (int max = 1; max <= maxWeight; max++) { // cols
-                dp[w][max] = Math.max(
-                        Math.max(dp[w - 1][max], dp[w][max - 1]),
-                        (weights[w - 1] > max ? 0 : dp[w - 1][max - weights[w - 1]] + values[w - 1])
+                dp[w][max] = Math.max(Math.max(dp[w - 1][max], dp[w][max - 1]), (weights[w - 1] > max ? 0 : dp[w - 1][max - weights[w - 1]] + values[w - 1])
 
                 );
             }
@@ -347,8 +381,7 @@ public class DPQns {
     public static boolean canJump(int[] nums) {
         int reach = 0;
         for (int i = 0; i < nums.length; i++) {
-            if (i > reach)
-                return false;
+            if (i > reach) return false;
 //            System.out.println("At " + i + ", can jump to " + (i + nums[i]));
             reach = Math.max(reach, i + nums[i]);
             if (reach > nums.length - 1) {
@@ -428,10 +461,7 @@ public class DPQns {
         if (nums.length == 1) {
             return nums[0];
         }
-        return Math.max(
-                _rob(Arrays.copyOfRange(nums, 0, nums.length - 1)),
-                _rob(Arrays.copyOfRange(nums, 1, nums.length))
-        );
+        return Math.max(_rob(Arrays.copyOfRange(nums, 0, nums.length - 1)), _rob(Arrays.copyOfRange(nums, 1, nums.length)));
     }
 
     public static int _rob(int[] nums) {
@@ -484,10 +514,7 @@ public class DPQns {
         int[][] arr = new int[rows][cols];
         for (int row = 1; row < rows; row++) {
             for (int col = 1; col < cols; col++) {
-                arr[row][col] =
-                        Math.max(Math.max(arr[row][col - 1], arr[row - 1][col]),
-                                (text1.charAt(col - 1) == text2.charAt(row - 1) ? 1 : 0) + arr[row - 1][col - 1]
-                        );
+                arr[row][col] = Math.max(Math.max(arr[row][col - 1], arr[row - 1][col]), (text1.charAt(col - 1) == text2.charAt(row - 1) ? 1 : 0) + arr[row - 1][col - 1]);
             }
         }
 //        for (int row = 0; row < rows; row++) {
@@ -514,32 +541,5 @@ public class DPQns {
             }
         }
         return sub.size();
-    }
-
-    public static int coinChange(int[] coins, int amount) {
-        if (amount == 0 || coins.length == 0) {
-            return -1;
-        }
-        return numberOfWays(coins, amount, new int[amount + 1]);
-    }
-
-    public static int numberOfWays(int[] coins, int amount, int[] map) {
-        if (amount == 0) {
-            return 0;
-        }
-        if (map[amount] != 0) {
-            return map[amount];
-        }
-        int min = Integer.MAX_VALUE;
-        for (int i = 0; i < coins.length; i++) {
-            int count = coins[i] > amount ? -1 : 1 + numberOfWays(coins, amount - coins[i], map);
-            if (count >= 0) {
-                min = Math.min(min, count);
-            }
-        }
-        if (min != Integer.MAX_VALUE) {
-            map[amount] = map[amount] == 0 ? min : Math.min(map[amount], min);
-        }
-        return map[amount];
     }
 }

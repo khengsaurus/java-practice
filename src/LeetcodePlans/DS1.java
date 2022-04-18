@@ -91,59 +91,6 @@ public class DS1 {
         return i == 0;
     }
 
-    // 74
-    public static boolean searchMatrix(int[][] matrix, int target) {
-        int row = 0;
-        boolean finished = false;
-        while (row < matrix.length - 1 && !finished) {
-            if (matrix[row + 1][0] <= target) {
-                row++;
-            } else {
-                finished = true;
-            }
-        }
-        return binSearchRow(matrix[row], 0, matrix[row].length - 1, target) >= 0;
-    }
-
-    public static int binSearchRow(int[] row, int left, int right, int target) {
-        if (left > right) return -1;
-        int mid = left + (right - left) / 2;
-        int midValue = row[mid];
-        if (target == midValue) return mid;
-        if (target < midValue) return binSearchRow(row, left, mid - 1, target);
-        return binSearchRow(row, mid + 1, right, target);
-    }
-
-    public static int binSearchMatrixRows(int[][] matrix, int top, int bot, int target) {
-        if (top > bot) return -1;
-        if (top == bot) return top;
-        int mid = top + (bot - top) / 2;
-        int midVal = matrix[mid][0];
-        if (midVal > target) {
-            return binSearchMatrixRows(matrix, top, mid - 1, target);
-        }
-        if (midVal < target) {
-            if (mid < matrix.length - 1 && matrix[mid + 1][0] > target) {
-                return mid;
-            } else {
-                return binSearchMatrixRows(matrix, mid + 1, bot, target);
-            }
-        }
-        return mid;
-    }
-
-    @Test
-    public void searchMatrixWorks() {
-        int[] r1 = new int[]{1, 3, 5, 7};
-        int[] r2 = new int[]{10, 11, 16, 20};
-        int[] r3 = new int[]{23, 30, 34, 60};
-        int[][] matrix = new int[][]{r1, r2, r3};
-        assertTrue(searchMatrix(matrix, 3));
-        assertTrue(searchMatrix(matrix, 60));
-        assertFalse(searchMatrix(matrix, 4));
-        assertFalse(searchMatrix(matrix, 61));
-    }
-
     // 36
     public static boolean isValidSudoku(char[][] board) {
         boolean[][] memoRow = new boolean[9][10];

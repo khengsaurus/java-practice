@@ -66,37 +66,6 @@ public class Sandbox {
         return nums[0];
     }
 
-    //    1337
-    public static int[] kWeakestRows(int[][] mat, int k) {
-        Map<Integer, Queue<Integer>> map = new HashMap<>();
-        int rows = mat.length, cols = mat[0].length;
-
-        for (int row = 0; row < rows; row++) {
-            int count = 0;
-            int[] _row = mat[row];
-            for (int j = 0; j < cols; j++) {
-                if (_row[j] == 0) break;
-                count++;
-            }
-            if (!map.containsKey(count)) {
-                Queue<Integer> newQueue = new LinkedList<>();
-                newQueue.add(row);
-                map.put(count, newQueue);
-            } else {
-                map.get(count).add(row);
-            }
-        }
-
-        int[] rv = new int[k];
-        int count = 0;
-        for (int i = 0; i < k; i++) {
-            while (!map.containsKey(count) || map.get(count).isEmpty()) count++;
-            rv[i] = map.get(count).remove();
-        }
-
-        return rv;
-    }
-
     //    991 - change the target... why can't we change startValue :/
     public static int brokenCalc(int startValue, int target) {
         if (startValue >= target) return startValue - target;
@@ -421,37 +390,5 @@ public class Sandbox {
             }
         }
         return p;
-    }
-
-    public static ListNode mergeTwoLists(ListNode list1, ListNode list2) {
-        if (list1 == null && list2 == null) {
-            return null;
-        }
-        ListNode head = null;
-        ListNode temp = null;
-        if (list1 == null || (list2 != null && list2.val < list1.val)) {
-            temp = list2.next;
-            head = list2;
-            list2 = temp;
-        } else {
-            temp = list1.next;
-            head = list1;
-            list1 = temp;
-        }
-        ListNode current = head;
-        while (list1 != null || list2 != null) {
-            if (list1 == null || (list2 != null && list2.val < list1.val)) {
-                temp = list2.next;
-                current.next = list2;
-                current = current.next;
-                list2 = temp;
-            } else {
-                temp = list1.next;
-                current.next = list1;
-                current = current.next;
-                list1 = temp;
-            }
-        }
-        return head;
     }
 }
