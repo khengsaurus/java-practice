@@ -1,3 +1,5 @@
+import Sandbox.Node;
+
 import java.util.Iterator;
 
 public class MyIterable implements Iterable {
@@ -27,7 +29,7 @@ public class MyIterable implements Iterable {
         }
     }
 
-//    public void add(Node node){}
+//    public void add(Sandbox.Node node){}
 
     @Override
     public String toString() {

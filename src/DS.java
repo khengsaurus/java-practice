@@ -1,33 +1,8 @@
-package LeetcodePlans;
-
 import org.junit.Test;
-
 import java.util.*;
-
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class DS1 {
-
-    public class TreeNode {
-        int val;
-        TreeNode left;
-        TreeNode right;
-
-        TreeNode() {
-        }
-
-        TreeNode(int val) {
-            this.val = val;
-        }
-
-        TreeNode(int val, TreeNode left, TreeNode right) {
-            this.val = val;
-            this.left = left;
-            this.right = right;
-        }
-    }
-
+public class DS {
     // 112
     public boolean hasPathSum(TreeNode root, int targetSum) {
         if (root == null) return false;
@@ -76,19 +51,18 @@ public class DS1 {
         return levels;
     }
 
-    // 946 - genius sln which isnt mine
-    public static boolean validateStackSequences(int[] pushed, int[] popped) {
-        int i = 0, j = 0;
-        for (int val : pushed) {
-            pushed[i++] = val; // req because i-- later;
-            while (j < popped.length && i > 0 && pushed[i - 1] == popped[j]) {
-                i--;
-                j++;
+    // 946. Validate Stack Sequences
+    public boolean validateStackSequences(int[] pushed, int[] popped) {
+        // pushed = [1,2,3,4,5], popped = [4,5,3,2,1]
+        int push = 0, pop = 0;
+        for (int i : pushed) {
+            pushed[push++] = i;
+            while (pop < popped.length && push > 0 && popped[pop] == pushed[push - 1]) {
+                push--;
+                pop++;
             }
-            System.out.println(i + ", " + j);
-            System.out.println(Arrays.toString(pushed));
         }
-        return i == 0;
+        return push == 0;
     }
 
     // 36

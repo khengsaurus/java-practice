@@ -1,3 +1,5 @@
+package Algos;
+
 class MergeSort {
     // Driver code
     public static void main(String args[]) {

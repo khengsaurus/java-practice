@@ -13,7 +13,7 @@ public class FBQns {
             tmp = tmp * 10 + 1; // 1, 11, 111...
             if (tmp * 9 >= A) {
                 for (int j = 1; j < 10; j++) {
-                    Long t = Long.valueOf(tmp * j);
+                    Long t = tmp * j;
                     if (A <= t && t <= B) {
                         ans++;
                     }

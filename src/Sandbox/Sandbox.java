@@ -1,10 +1,39 @@
+package Sandbox;
+
 import java.lang.reflect.Array;
 import java.util.*;
 
 public class Sandbox {
     public static void main(String[] arg) {
+        TreeSet<Integer> s = new TreeSet<>();
+//        s = (TreeSet<Integer>) s.descendingSet();
+        s.add(0);
+        s.add(3);
+        s.add(2);
+        s.add(1);
+        s.add(4);
+        System.out.println(s);
+        System.out.println(s.lower(5));
+        System.out.println(new ArrayList(s));
     }
 
+    //    202. Happy Number
+    public boolean isHappy(int n) {
+        Set<Integer> inLoop = new HashSet<>();
+        int squareSum, remain;
+        while (inLoop.add(n)) {
+            squareSum = 0;
+            while (n > 0) {
+                remain = n % 10;
+                squareSum += remain * remain;
+                n /= 10;
+            }
+            if (squareSum == 1) return true;
+            n = squareSum;
+
+        }
+        return false;
+    }
 
     //    31
     public static void nextPermutation(int[] nums) {
@@ -118,59 +147,6 @@ public class Sandbox {
             }
         }
         return roman.toString();
-    }
-
-    //    763
-    public static List<Integer> partitionLabelsBetter(String s) {
-        int sLen = s.length();
-        int[] last = new int[26];
-        for (int i = 0; i < sLen; i++) {
-            last[s.charAt(i) - 'a'] = i;
-        }
-        int left = 0;
-        List<Integer> list = new ArrayList<>();
-
-        while (left < sLen) {
-            int right = last[s.charAt(left) - 'a'];
-            for (int i = left; i < right; i++) {
-                right = Math.max(right, last[s.charAt(i) - 'a']);
-            }
-            list.add(right - left + 1);
-            left = right + 1;
-        }
-        return list;
-    }
-
-    public static List<Integer> partitionLabels(String s) {
-        int sLen = s.length();
-        int[] firstAppearances = new int[26]; // non 0 index of first appearance
-        int[] memo = new int[sLen];
-        for (int i = 0; i < sLen; i++) {
-            int cValue = Character.getNumericValue(s.charAt(i)) - 10;
-            int firstAppearance = firstAppearances[cValue];
-            if (firstAppearance == 0) {
-                firstAppearances[cValue] = i + 1;
-                memo[i] = i;
-            } else {
-                int partitionRootIndex = firstAppearance - 1;
-                int correctTo = memo[partitionRootIndex];
-                for (int j = i; j > partitionRootIndex; j--) {
-                    memo[j] = correctTo;
-                }
-            }
-        }
-        List<Integer> breaks = new ArrayList<>();
-        int count = 1;
-        for (int i = 1; i < sLen; i++) {
-            if (memo[i] != memo[i - 1]) {
-                breaks.add(count);
-                count = 1;
-            } else {
-                count += 1;
-            }
-            if (i == sLen - 1) breaks.add(count);
-        }
-        return breaks;
     }
 
     //    1007

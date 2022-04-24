@@ -5,13 +5,169 @@ import java.util.*;
 import static org.junit.Assert.assertTrue;
 
 public class DPQns {
-    public static void main(String[] args) {
-//        int res = coinChange2(new int[]{2, 5}, 11);
-//        System.out.println(res);
+    /**
+     * 123. Best Time to Buy and Sell Stock III
+     * Context: consider the cost price
+     */
+    public int maxProfit4(int[] prices) {
+        int days = prices.length;
+        if (days <= 1) return 0;
+        int[][] profits = new int[3][days];
+
+        for (int txn = 1; txn < 3; txn++) {
+            int maxAmt = -prices[0]; // cost price
+            for (int day = 1; day < days; day++) {
+                /* maxAmt on txn,day = maxProfit of txn ending on prevDay
+                   AND minimum (cost) price on any prevDay before day */
+                maxAmt = Math.max(maxAmt, profits[txn - 1][day - 1] - prices[day - 1]);
+                profits[txn][day] = Math.max(profits[txn][day - 1], maxAmt + prices[day]);
+            }
+        }
+        return profits[2][days - 1];
+    }
+
+    public int maxProfit4AmazingSln(int[] prices) {
+        int buy1 = Integer.MAX_VALUE, buy2 = Integer.MAX_VALUE;
+        int profit1 = 0, profit2 = 0;
+        for (int p : prices) {
+            buy1 = Math.min(buy1, p);
+            profit1 = Math.max(profit1, p - buy1); // can buy with the lowest price, and sell with the highest price
+            buy2 = Math.min(buy2, p - profit1); // ^, and we sink a new cost price
+            profit2 = Math.max(profit2, p - buy2);
+        }
+        return profit2;
+    }
+
+    /**
+     * 1014 - Best scoring scenic pair
+     * score(i,j) = values[i] + i  +  values[j] - j
+     */
+    public int maxScoreSightseeingPair(int[] values) {
+        int max = 0, maxL = values[0];
+        for (int i = 1; i < values.length; i++) {
+            max = Math.max(max, maxL + values[i] - i);
+            maxL = Math.max(maxL, values[i] + i);
+        }
+        return max;
+    }
+
+    //    139. Word Break
+    public boolean wordBreak(String s, List<String> wordDict) {
+        Set<String> words = new HashSet<>(wordDict);
+        boolean[] dp = new boolean[s.length() + 1];
+        dp[0] = true;
+
+        for (int r = 1; r < s.length() + 1; r++) {
+            for (int l = 0; l < r; l++) { // l = 0, r = 3;
+                if (words.contains(s.substring(l, r)) && dp[l]) {
+                    dp[r] = true;
+                }
+            }
+        }
+        return dp[s.length()];
+    }
+
+    //    1143. Longest Common Subsequence
+    public int longestCommonSubsequenceBottomUp(String text1, String text2) {
+        int cols = text1.length(), rows = text2.length();
+        int[][] dp = new int[cols + 1][rows + 1];
+
+        for (int i = cols - 1; i >= 0; i--) {
+            for (int j = rows - 1; j >= 0; j--) {
+                if (text1.charAt(i) == text2.charAt(j)) {
+                    dp[i][j] = 1 + dp[i + 1][j + 1];
+                } else {
+                    dp[i][j] = Math.max(dp[i][j + 1], dp[i + 1][j]);
+                }
+            }
+        }
+        return dp[0][0];
+    }
+
+    public int longestCommonSubsequenceTopDown(String text1, String text2) {
+        int rows = text1.length() + 1, cols = text2.length() + 1;
+        int[][] arr = new int[rows][cols];
+        for (int i = 1; i < rows; i++) {
+            for (int j = 1; j < cols; j++) {
+                arr[i][j] = Math.max(
+                        Math.max(arr[i][j - 1], arr[i - 1][j]),
+                        arr[i - 1][j - 1] + (text1.charAt(i - 1) == text2.charAt(j - 1) ? 1 : 0)
+                );
+            }
+        }
+        return arr[rows - 1][cols - 1];
+    }
+
+
+    /**
+     * 518. Coin Change 2
+     * Unbounded knapsack
+     */
+    private Integer[][] dp518;
+
+    public int changeKnapsack(int amount, int[] coins) {
+        if (amount == 0) return 1;
+        if (coins.length == 0) return 0;
+        dp518 = new Integer[coins.length][amount + 1];
+        return changeHelper(amount, coins, 0);
+    }
+
+    private int changeHelper(int amount, int[] coins, int take) {
+        if (amount == 0) return 1;
+        if (amount < 0 || take >= coins.length) return 0;
+        if (dp518[take][amount] != null) return dp518[take][amount];
+
+        int w0 = changeHelper(amount, coins, take + 1);
+        int w1 = changeHelper(amount - coins[take], coins, take);
+        int sum = w0 + w1;
+        dp518[take][amount] = sum;
+        return sum;
+    }
+
+    public static boolean lemonadeChange(int[] bills) {
+        int five = 0, ten = 0;
+        for (int i : bills) {
+            switch (i) {
+                case 20: {
+                    if (five <= 0) return false;
+                    if (ten <= 0) {
+                        if (five < 3) return false;
+                        five -= 3;
+                    } else {
+                        ten--;
+                        five--;
+                    }
+                    break;
+                }
+                case 10: {
+                    if (five == 0) return false;
+                    five--;
+                    ten++;
+                    break;
+                }
+                case 5:
+                    five++;
+                    break;
+            }
+        }
+        return true;
+    }
+
+    public static int change(int amount, int[] coins) {
+        int[] dp = new int[amount + 1];
+        for (int j = 1; j <= coins.length; j++) {
+            dp[0] = 1;
+            for (int i = 1; i < amount + 1; i++) {
+                if (i - coins[j - 1] >= 0) {
+                    dp[i] += dp[i - coins[j - 1]];
+                }
+            }
+        }
+        return dp[amount];
     }
 
     //    322. Coin Change
-    public int coinChange2(int[] coins, int amount) {
+    public int coinChange(int[] coins, int amount) {
         int[] dp = new int[amount + 1];
         Arrays.fill(dp, amount + 1);
         dp[0] = 0;
@@ -27,7 +183,7 @@ public class DPQns {
         return dp[amount] > amount ? -1 : dp[amount];
     }
 
-    public int coinChange(int[] coins, int amount) {
+    public int coinChange2(int[] coins, int amount) {
         if (amount == 0) return 0;
         if (coins.length == 0) return -1;
         return dp322(coins, amount, new int[amount + 1]);
@@ -66,19 +222,6 @@ public class DPQns {
     }
 
     /**
-     * 1014 - Best scoring scenic pair
-     * Break the problem down! Do the math! Consider how to dp it!
-     */
-    public static int maxScoreSightseeingPair(int[] values) {
-        int maxLeft = values[0], max = 0;
-        for (int i = 1; i < values.length; i++) {
-            max = Math.max(max, maxLeft + values[i] - i);
-            maxLeft = Math.max(maxLeft, i + values[i]);
-        }
-        return max;
-    }
-
-    /**
      * 309 - Best Time to Buy and Sell Stock with Cooling Period
      * https://www.youtube.com/watch?v=I7j0F7AHpb8
      * State based decision:
@@ -90,22 +233,22 @@ public class DPQns {
     public static int maxProfit(int[] prices) {
         buy = new int[prices.length];
         sell = new int[prices.length];
-        return dfs714(prices, 0, true);
+        return dfs309(prices, 0, true);
     }
 
-    public static int dfs714(int[] prices, int day, boolean canBuy) {
+    public static int dfs309(int[] prices, int day, boolean canBuy) {
         if (day >= prices.length) return 0;
         if (canBuy) {
             if (buy[day] != 0) return buy[day];
         } else if (sell[day] != 0) {
             return sell[day];
         }
-        int noAction = dfs714(prices, day + 1, canBuy);
+        int noAction = dfs309(prices, day + 1, canBuy);
         if (canBuy) {
-            buy[day] = Math.max(noAction, dfs714(prices, day + 1, false) - prices[day]);
+            buy[day] = Math.max(noAction, dfs309(prices, day + 1, false) - prices[day]);
             return buy[day];
         } else {
-            sell[day] = Math.max(noAction, dfs714(prices, day + 2, true) + prices[day]);
+            sell[day] = Math.max(noAction, dfs309(prices, day + 2, true) + prices[day]);
             return sell[day];
         }
     }
@@ -165,7 +308,7 @@ public class DPQns {
     public static int maxSubarraySumCircular(int[] nums) {
         if (nums.length == 1) return nums[0];
         if (nums.length == 2) return Math.max(nums[0], nums[1]);
-        int total = 0, maxSum = -Integer.MAX_VALUE, minSum = 0;
+        int total = 0, maxSum = Integer.MIN_VALUE, minSum = 0;
         int currMax = 0, currMin = 0;
         for (int i = 0; i < nums.length; i++) {
             total += nums[i];
@@ -178,21 +321,18 @@ public class DPQns {
         return total == minSum ? maxSum : Math.max(maxSum, total - minSum);
     }
 
-    //    45
+    //    45. Jump Game II
     public static int jumpBetter(int[] nums) {
-        if (nums.length == 1) return 0;
-        int leftBoundary = 0, rightBoundary = nums[0];
-        int farthestJump = nums[0];
-        int numJumps = 1;
-        while (farthestJump < nums.length - 1) {
-            for (int j = leftBoundary; j <= rightBoundary; j++) {
-                farthestJump = Math.max(farthestJump, j + nums[j]);
+        // Idea: you don't have to `jump` at that specific value, rather just log the jump and reach the max
+        int end = 0, max = 0, jumps = 0;
+        for (int i = 0; i < nums.length - 1; i++) {
+            max = Math.max(max, i + nums[i]);
+            if (i == end) {
+                end = max;
+                jumps++;
             }
-            leftBoundary = rightBoundary + 1;
-            rightBoundary = farthestJump;
-            numJumps++;
         }
-        return numJumps;
+        return jumps;
     }
 
     public static int jump(int[] nums) {
@@ -474,53 +614,6 @@ public class DPQns {
             didRobLast = t + nums[v];
         }
         return Math.max(didRobLast, notRobLast);
-    }
-
-    //    HELP
-    public static boolean wordBreak(String s, List<String> wordDict) {
-        Set<String> dict = new HashSet(wordDict);
-        boolean[] dp = new boolean[s.length() + 1];
-        dp[0] = true;
-//         49 MB - not using StringBuilder.
-//         Doesn't make sense?? StringBuilder.toString() -> new String
-//         String.subString() -> new String
-        for (int i = 1; i <= s.length(); i++) {
-            for (int j = 0; j < i; j++) {
-                if (dp[j] && dict.contains(s.substring(j, i))) {
-                    dp[i] = true;
-                    break;
-                }
-            }
-        }
-//         43 MB - using StringBuilder
-//        StringBuilder str = new StringBuilder();
-//        for (int i = 1; i <= s.length(); i++) {
-//            for (int j = 0; j < i; j++) {
-//                str.setLength(0);
-//                str.append(s.substring(j, i));
-//                if (dp[j] && dict.contains(str.toString())) {
-//                    dp[i] = true;
-//                    break;
-//                }
-//            }
-//        }
-        return dp[s.length()];
-    }
-
-    public static int longestCommonSubsequence(String text1, String text2) {
-        // NOTE: in 2d array, iterate rows first, then cols
-        int cols = text1.length() + 1;
-        int rows = text2.length() + 1;
-        int[][] arr = new int[rows][cols];
-        for (int row = 1; row < rows; row++) {
-            for (int col = 1; col < cols; col++) {
-                arr[row][col] = Math.max(Math.max(arr[row][col - 1], arr[row - 1][col]), (text1.charAt(col - 1) == text2.charAt(row - 1) ? 1 : 0) + arr[row - 1][col - 1]);
-            }
-        }
-//        for (int row = 0; row < rows; row++) {
-//            System.out.println(Arrays.toString(arr[row]));
-//        }
-        return arr[rows - 1][cols - 1];
     }
 
     public static int lengthOfLIS(int[] nums) {

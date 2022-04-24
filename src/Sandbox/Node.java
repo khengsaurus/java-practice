@@ -1,3 +1,5 @@
+package Sandbox;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -50,7 +52,7 @@ public class Node implements Comparable<Node>, Iterator {
 //    @Override
 //    public String toString() {
 //        StringBuilder str = new StringBuilder();
-//        Node head = this;
+//        Sandbox.Node head = this;
 //        while (head != null) {
 //            System.out.println(head.val);
 //            str.append(head.val);

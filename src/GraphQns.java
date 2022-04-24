@@ -1,12 +1,6 @@
 import java.util.*;
 
 class GraphQns implements HasDirs {
-    public static void main(String[] args) {
-//        GraphQns sln = new GraphQns();
-        int res = longestIncreasingPath(new int[][]{{9, 9, 4}, {6, 6, 8}, {2, 1, 1}});
-        System.out.println(res);
-    }
-
     public GraphQns() {
     }
 
@@ -241,8 +235,9 @@ class GraphQns implements HasDirs {
      */
     public static int numOfMinutes(int n, int headID, int[] manager, int[] informTime) {
         int res = 0;
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < n; i++) {
             res = Math.max(res, dfs1376(i, manager, informTime));
+        }
         return res;
     }
 

@@ -1,12 +1,161 @@
 import java.util.*;
 
 public class ArrayQns {
-    public static void main(String[] args) {
-        System.out.println(judgeSquareSum(11));
-        System.out.println(judgeSquareSum(12));
-        System.out.println(judgeSquareSum(4));
-        System.out.println(judgeSquareSum(5));
-        System.out.println(judgeSquareSum(9));
+    //    714. Best Time to Buy and Sell Stock with Transaction Fee
+    public int maxProfit(int[] prices, int fee) {
+        int prevMin = Integer.MAX_VALUE, prevMax = 0;
+        int currMax = 0, globalMax = 0;
+        for (int price : prices) {
+            if (price < prevMax - fee || price <= prevMin) {
+                prevMax = price;
+                prevMin = price;
+                globalMax += Math.max(0, currMax - fee);
+                currMax = 0;
+            } else {
+                prevMax = Math.max(prevMax, price);
+                currMax = Math.max(currMax, price - prevMin);
+            }
+        }
+        if (prevMin != prices[prices.length - 1]) {
+            globalMax += Math.max(0, currMax - fee);
+        }
+        return globalMax;
+    }
+
+    public int maxProfitBetter(int[] prices, int fee) {
+        if (prices.length < 2) return 0;
+        int total = 0, minimum = prices[0];
+        for (int p : prices) {
+            if (p < minimum) minimum = p;
+            else if (p > minimum + fee) {
+                total += p - fee - minimum;
+                minimum = p - fee;
+            }
+        }
+        return total;
+    }
+
+    //    54. Spiral Matrix
+    public List<Integer> spiralOrder(int[][] matrix) {
+        List<Integer> res = new ArrayList<Integer>();
+        if (matrix.length == 0) return res;
+
+        int rowBegin = 0, rowEnd = matrix.length - 1, colBegin = 0, colEnd = matrix[0].length - 1;
+        while (rowBegin <= rowEnd && colBegin <= colEnd) {
+            // Right
+            for (int j = colBegin; j <= colEnd; j++) res.add(matrix[rowBegin][j]);
+            rowBegin++;
+            // Down
+            for (int j = rowBegin; j <= rowEnd; j++) res.add(matrix[j][colEnd]);
+            colEnd--;
+
+            // Left
+            if (rowBegin <= rowEnd) {
+                for (int j = colEnd; j >= colBegin; j--) res.add(matrix[rowEnd][j]);
+            }
+            rowEnd--;
+
+            // Up
+            if (colBegin <= colEnd) {
+                for (int j = rowEnd; j >= rowBegin; j--) res.add(matrix[j][colBegin]);
+            }
+            colBegin++;
+        }
+
+        return res;
+    }
+
+    /**
+     * 416. Partition Equal Subset Sum
+     * Failed attempt using sliding window
+     * Appropriate solution for finding a consecutive sub-sequence of a sorted array with value == total/2
+     */
+    public static boolean canPartitionDP(int[] nums) {
+        int max = 0, total = 0;
+        for (int n : nums) {
+            total += n;
+            max = Math.max(max, n);
+        }
+        if (max * 2 > total) return false;
+
+        int[][] dp = new int[nums.length + 2][nums.length];
+        for (int i = 0; i < nums.length; i++) dp[1][i] = nums[i];
+        for (int row = 2; row < nums.length + 2; row++) {
+            for (int col = 0; col < nums.length; col++) {
+                if (row - 2 == col) { // same number, cannot take
+                    dp[row][col] = dp[row - 1][col];
+                } else {
+                    int prevRow = row - 1, toAdd = nums[row - 2], newVal = dp[prevRow][col] + toAdd;
+                    while (prevRow > 0 && newVal * 2 > total) {
+                        newVal = dp[--prevRow][col] + toAdd;
+                    }
+                    if (newVal * 2 == total) return true;
+                    dp[row][col] = newVal;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean canPartitionFailed(int[] nums) {
+        int total = 0, windowSum = 0, l = 0, r = 0;
+//        Arrays.sort(nums);
+        for (int n : nums) total += n;
+
+        // init window
+        while (windowSum * 2 < total) windowSum += nums[r++];
+
+        while (l <= r && r < nums.length && windowSum * 2 != total) {
+            if (windowSum * 2 > total) {
+                windowSum -= nums[l++];
+            } else if (windowSum * 2 < total) {
+                windowSum += nums[r++];
+            }
+            if (r < l) r++;
+        }
+
+        return windowSum * 2 == total;
+    }
+
+    //    1855. Maximum Distance Between a Pair of Values, Two pointers
+    public int maxDistance1(int[] nums1, int[] nums2) {
+        int res = 0, i = 0;
+        for (int j = 0; j < nums2.length; ++j) {
+            while (i < nums1.length && nums1[i] > nums2[j]) i++;
+            if (i == nums1.length) break;
+            res = Math.max(res, j - i);
+        }
+        return res;
+    }
+
+    public int maxDistance2(int[] A, int[] B) {
+        int i = 0, j = 0, res = 0;
+        while (i < A.length && j < B.length) {
+            if (A[i] > B[j]) i++;
+            else res = Math.max(res, j++ - i);
+        }
+        return res;
+    }
+
+    //    75. Sort Colors
+    public static void sortColors(int[] nums) {
+        int l = 0, r = nums.length - 1, m = 0;
+        while (m < r) {
+            switch (nums[m]) {
+                case 0:
+                    swap(nums, l++, m++);
+                case 1:
+                    m++;
+                case 2:
+                    swap(nums, r--, m++);
+            }
+        }
+    }
+
+    private static void swap(int[] nums, int l, int r) {
+        int t = nums[l];
+        nums[l] = nums[r];
+        nums[r] = t;
     }
 
     /**
@@ -14,7 +163,7 @@ public class ArrayQns {
      * Two pointers
      */
     public static boolean judgeSquareSum(int c) {
-        long left = 0, right = (long)Math.sqrt(c);
+        long left = 0, right = (long) Math.sqrt(c);
         while (left <= right) {
             long cur = left * left + right * right;
             if (cur < c) {
@@ -69,25 +218,6 @@ public class ArrayQns {
             }
         }
         return new int[]{-1, -1};
-    }
-
-    //    39. Combination Sum
-    public List<List<Integer>> combinationSum(int[] nums, int target) {
-        List<List<Integer>> combos = new ArrayList<>();
-        backtrack39(nums, target, 0, 0, combos, new LinkedList<>());
-        return combos;
-    }
-
-    public void backtrack39(int[] nums, int target, int start, int curSum, List<List<Integer>> combos, Deque<Integer> combo) {
-        if (curSum == target) combos.add(new ArrayList(combo));
-        while (start < nums.length) {
-            if (nums[start] <= target - curSum) {
-                combo.offerLast(nums[start]);
-                backtrack39(nums, target, start, curSum + nums[start], combos, combo);
-                combo.pollLast();
-            }
-            start++;
-        }
     }
 
     /**

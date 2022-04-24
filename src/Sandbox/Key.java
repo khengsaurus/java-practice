@@ -1,3 +1,5 @@
+package Sandbox;
+
 public class Key implements Comparable<Key> {
     int data;
     private String key;

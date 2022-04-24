@@ -1,6 +1,58 @@
+import Sandbox.Node;
+
 import java.util.*;
 
 public class TreeQns {
+
+    //    199. Binary Tree Right Side View
+    public List<Integer> rightSideView(TreeNode root) {
+        List<Integer> view = new ArrayList<>();
+        traversal199(root, view, 0);
+        return view;
+    }
+
+    private void traversal199(TreeNode root, List<Integer> result, int depth) {
+        if (root == null) return;
+        if (depth == result.size()) result.add(root.val);
+        traversal199(root.right, result, depth + 1);
+        traversal199(root.left, result, depth + 1);
+    }
+
+    //    105. Construct Binary Tree from Preorder and Inorder Traversal
+    public TreeNode buildTree(int[] preorder, int[] inorder) {
+        return buildTree(preorder, inorder, 0, preorder.length, 0, inorder.length);
+    }
+
+    public TreeNode buildTree(int[] preorder, int[] inorder, int startPre, int endPre, int startIn, int endIn) {
+        if (startPre >= endPre) return null;
+        if (endPre - startPre == 1) return new TreeNode(preorder[startPre]);
+        int root = 0;
+        for (int i = startIn; i < endIn; ++i) {
+            if (inorder[i] == preorder[startPre]) {
+                root = i;
+                break;
+            }
+        }
+        int startRight = root - startIn + startPre + 1;
+        TreeNode left = buildTree(preorder, inorder, startPre + 1, startRight, startIn, root);
+        TreeNode right = buildTree(preorder, inorder, startRight, endPre, root + 1, endIn);
+        return new TreeNode(preorder[startPre], left, right);
+    }
+
+    //    543. Diameter of Binary Tree
+    private int maxDepth = 0;
+
+    public int diameterOfBinaryTree(TreeNode root) {
+        getMaxDepth(root);
+        return maxDepth;
+    }
+
+    public int getMaxDepth(TreeNode root) {
+        if (root == null) return 0;
+        int left = getMaxDepth(root.left), right = getMaxDepth(root.right);
+        maxDepth = Math.max(maxDepth, left + right);
+        return Math.max(left, right) + 1;
+    }
 
     //    230. Kth Smallest Element in a BST
     public int kthSmallest(TreeNode root, int k) {

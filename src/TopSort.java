@@ -2,9 +2,48 @@ import java.util.*;
 
 public class TopSort implements HasDirs {
     public static void main(String[] args) {
-//        List<Integer> roots = findMinHeightTrees(7, new int[][]{{3, 0}, {3, 1}, {3, 2}, {3, 4}, {4, 5}, {5, 6}});
-//        System.out.println(roots);
         longestIncreasingPath(new int[][]{{9, 9, 4}, {6, 6, 8}, {2, 1, 1}});
+    }
+
+    /**
+     * 207. Course Schedule via Top sort
+     * [1,0]: to take course 1 you need to finish course 0
+     * 0 is the parent, 1 is the child
+     * Top sort: 0 -> 1
+     */
+    public boolean canFinish(int numCourses, int[][] prerequisites) {
+        int[] inDegree = new int[numCourses];
+        Queue<Integer> q = new LinkedList<>();
+        Map<Integer, Set<Integer>> parentChild = new HashMap<>();
+
+        for (int i = 0; i < prerequisites.length; i++) {
+            int parent = prerequisites[i][1];
+            int child = prerequisites[i][0];
+            inDegree[child]++;
+
+            parentChild.computeIfAbsent(parent, k -> new HashSet<>()).add(child);
+        }
+
+        int studied = 0;
+        for (int i = 0; i < inDegree.length; i++) {
+            if (inDegree[i] == 0) {
+                q.offer(i);
+                studied++;
+            }
+        }
+
+        while (!q.isEmpty()) {
+            int parent = q.poll();
+            Set<Integer> children = parentChild.get(parent);
+            if (children == null) continue;
+            for (int child : children) {
+                if (--inDegree[child] == 0) {
+                    q.offer(child);
+                    studied++;
+                }
+            }
+        }
+        return studied == numCourses;
     }
 
     /**
@@ -26,7 +65,6 @@ public class TopSort implements HasDirs {
                 }
             }
         }
-
 
         Queue<int[]> queue = new LinkedList<>();
         for (int i = 0; i < m; i++) {
@@ -95,76 +133,65 @@ public class TopSort implements HasDirs {
         return leaves;
     }
 
-    public int[] findOrder2(int numCourses, int[][] prerequisites) {
-        Map<Integer, List<Integer>> adjList = new HashMap<Integer, List<Integer>>();
-        int[] degree = new int[numCourses];
-        int[] topologicalOrder = new int[numCourses];
-
-        for (int[] prerequisite : prerequisites) {
-            int parent = prerequisite[1], child = prerequisite[0];
-            List<Integer> children = adjList.getOrDefault(parent, new ArrayList<Integer>());
-            children.add(child);
-            adjList.put(parent, children);
-            degree[child] += 1;
+    //    1462. Course Schedule IV
+    public List<Boolean> checkIfPrerequisite(int numCourses, int[][] prerequisites, int[][] queries) {
+        Map<Integer, Set<Integer>> parentChildren = new HashMap<>(), childParents = new HashMap<>();
+        int[] inDegree = new int[numCourses];
+        for (int[] childParent : prerequisites) {
+            inDegree[childParent[0]]++;
+            parentChildren.computeIfAbsent(childParent[1], k -> new HashSet<>()).add(childParent[0]);
         }
 
-        Queue<Integer> q = new LinkedList<Integer>();
-        for (int i = 0; i < numCourses; i++) {
-            if (degree[i] == 0) {
-                q.add(i);
-            }
-        }
+        Queue<Integer> q = new LinkedList<>();
+        for (int i = 0; i < inDegree.length; i++) if (inDegree[i] == 0) q.add(i);
 
-        int i = 0;
         while (!q.isEmpty()) {
             int parent = q.remove();
-            topologicalOrder[i++] = parent;
-            if (adjList.containsKey(parent)) {
-                for (Integer child : adjList.get(parent)) {
-                    if (--degree[child] == 0) q.add(child);
+            if (parentChildren.containsKey(parent)) {
+                for (int child : parentChildren.get(parent)) {
+                    childParents.computeIfAbsent(child, k -> new HashSet<>()).add(parent);
+                    childParents.get(child).addAll(childParents.computeIfAbsent(parent, k -> new HashSet<>()));
+                    if (--inDegree[child] == 0) q.add(child);
                 }
             }
         }
-        return i == numCourses ? topologicalOrder : new int[0];
+
+        List<Boolean> res = new ArrayList<>();
+        for (int i = 0; i < queries.length; i++) {
+            int parent = queries[i][1], child = queries[i][0];
+            Set<Integer> parents = childParents.get(child);
+            res.add(parents != null && parents.contains(parent));
+        }
+        return res;
     }
 
     //    210. Course Schedule II
     public int[] findOrder(int numCourses, int[][] prerequisites) {
-        if (numCourses <= 0) return new int[0];
-
-        //1. Init Map
-        HashMap<Integer, Integer> degree = new HashMap<>();
-        HashMap<Integer, List<Integer>> topoMap = new HashMap<>();
-        for (int i = 0; i < numCourses; i++) {
-            degree.put(i, 0);
-            topoMap.put(i, new ArrayList<Integer>());
+        Map<Integer, Set<Integer>> parentChildren = new HashMap<>();
+        int[] inDegree = new int[numCourses];
+        for (int[] childParent : prerequisites) {
+            inDegree[childParent[0]]++;
+            parentChildren.computeIfAbsent(childParent[1], k -> new HashSet<>()).add(childParent[0]);
         }
 
-        //2. Build Map
-        for (int[] pair : prerequisites) {
-            int child = pair[0], parent = pair[1]; // [0, 1] - [child <- parent]
-            topoMap.get(parent).add(child);  // put the child into it's parent's list
-            degree.put(child, degree.get(child) + 1); // increase child's degree by 1
+        Queue<Integer> q = new LinkedList<>();
+        for (int i = 0; i < inDegree.length; i++) {
+            if (inDegree[i] == 0) q.add(i);
         }
 
-        //3. find course with 0 degree, minus one to its children's degrees, until all degree = 0
         int[] res = new int[numCourses];
-        int index = 0;
-        while (!degree.isEmpty()) {
-            boolean childWithDegree0 = false;
-            for (int c : degree.keySet().stream().toList()) {
-                if (degree.get(c) == 0) {
-                    childWithDegree0 = true;
-                    res[index++] = c;
-                    List<Integer> parents = topoMap.get(c);  // get the node's parents, and decrease their degrees
-                    for (int parent : parents) degree.put(parent, degree.get(parent) - 1);
-                    degree.remove(c);      // remove the current node with 0 degree and start over
-                    break;
+        int curr = 0;
+        while (!q.isEmpty()) {
+            int parent = q.remove();
+            res[curr++] = parent;
+            if (parentChildren.containsKey(parent)) {
+                for (int child : parentChildren.get(parent)) {
+                    if (--inDegree[child] == 0) q.add(child);
                 }
             }
-            if (!childWithDegree0) return new int[0];
         }
-        return res;
+
+        return curr == numCourses ? res : new int[0];
     }
 
 }

@@ -1,3 +1,5 @@
+package ClassQuestions;
+
 //    208. Implement Trie (Prefix Tree)
 class Trie {
     private final TrieNode root;

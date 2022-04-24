@@ -2,11 +2,53 @@ import java.util.*;
 
 public class BSQns {
     public static void main(String[] args) {
-        int res = search(new int[]{3, 1}, 1);
-        System.out.println(res);
     }
 
     public BSQns() {
+    }
+
+    //    1855. Maximum Distance Between a Pair of Values, Binary search
+    public int maxDistance(int[] nums1, int[] nums2) {
+        int dist = 0;
+        for (int i = 0; i < nums1.length; i++) {
+            if (i == nums2.length) break;
+            int l = i, r = nums2.length - 1;
+            while (l <= r) {
+                int m = (l + r) / 2;
+                if (nums1[i] > nums2[m]) {
+                    r = m - 1;
+                } else {
+                    l = m + 1;
+                }
+            }
+            dist = Math.max(dist, r - i);
+        }
+        return dist;
+    }
+
+    /**
+     * 99. Recover Binary Search Tree
+     * In-order traversal TODO!!!
+     * Think of it as a in-order validation - an in-order BST array will be sorted ascending!!!
+     */
+    TreeNode prev = null, first = null, second = null;
+
+    public void recoverTree(TreeNode root) {
+        inOrder99(root);
+        int temp = first.val;
+        first.val = second.val;
+        second.val = temp;
+    }
+
+    private void inOrder99(TreeNode curr) {
+        if (curr == null) return;
+        inOrder99(curr.left);
+        if (prev != null && prev.val > curr.val) {
+            if (first == null) first = prev;
+            second = curr;
+        }
+        prev = curr;
+        inOrder99(curr.right);
     }
 
     //    33. Search in Rotated Sorted Array

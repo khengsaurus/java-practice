@@ -1,3 +1,5 @@
+package Algos;
+
 import java.util.Arrays;
 
 // Original algo from https://www.geeksforgeeks.org/min-heap-in-java
