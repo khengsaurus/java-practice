@@ -1,6 +1,27 @@
 import java.util.*;
 
 public class ArrayQns {
+
+    //    31. Next Permutation
+    public void nextPermutation(int[] nums) {
+        if(nums == null || nums.length <= 1) return;
+        int i = nums.length - 2;
+
+        while (i >= 0 && nums[i] >= nums[i + 1]) i--;
+        if (i < 0) {
+            Arrays.sort(nums);
+        } else {
+            int j = nums.length - 1;
+            while (nums[j] <= nums[i]) j--;
+            swap(nums, i, j);
+            reverse(nums, i+1, nums.length-1);
+        }
+    }
+
+    public void reverse(int[] nums, int i, int j) {
+        while (i < j) swap(nums, i++, j--);
+    }
+
     //    714. Best Time to Buy and Sell Stock with Transaction Fee
     public int maxProfit(int[] prices, int fee) {
         int prevMin = Integer.MAX_VALUE, prevMax = 0;
@@ -33,36 +54,6 @@ public class ArrayQns {
             }
         }
         return total;
-    }
-
-    //    54. Spiral Matrix
-    public List<Integer> spiralOrder(int[][] matrix) {
-        List<Integer> res = new ArrayList<Integer>();
-        if (matrix.length == 0) return res;
-
-        int rowBegin = 0, rowEnd = matrix.length - 1, colBegin = 0, colEnd = matrix[0].length - 1;
-        while (rowBegin <= rowEnd && colBegin <= colEnd) {
-            // Right
-            for (int j = colBegin; j <= colEnd; j++) res.add(matrix[rowBegin][j]);
-            rowBegin++;
-            // Down
-            for (int j = rowBegin; j <= rowEnd; j++) res.add(matrix[j][colEnd]);
-            colEnd--;
-
-            // Left
-            if (rowBegin <= rowEnd) {
-                for (int j = colEnd; j >= colBegin; j--) res.add(matrix[rowEnd][j]);
-            }
-            rowEnd--;
-
-            // Up
-            if (colBegin <= colEnd) {
-                for (int j = rowEnd; j >= rowBegin; j--) res.add(matrix[j][colBegin]);
-            }
-            colBegin++;
-        }
-
-        return res;
     }
 
     /**
@@ -177,28 +168,28 @@ public class ArrayQns {
         return false;
     }
 
-    /**
-     * 15. 3Sum
-     * Two pointers
-     */
-    public static List<List<Integer>> threeSum(int[] nums) {
+    //    15. 3Sum
+    public List<List<Integer>> threeSum(int[] nums) {
+        List<List<Integer>> res = new ArrayList<>();
+        if (nums.length <= 2) return res;
         Arrays.sort(nums);
-        List<List<Integer>> res = new LinkedList<>();
+
         for (int i = 0; i < nums.length - 2; i++) {
-            if (i == 0 || nums[i] != nums[i - 1]) {
-                int l = i + 1, r = nums.length - 1, sum = -nums[i];
-                while (l < r) {
-                    if (nums[l] + nums[r] == sum) {
-                        res.add(Arrays.asList(nums[i], nums[l], nums[r]));
-                        while (l < r && nums[l] == nums[l + 1]) l++;
-                        while (l < r && nums[r] == nums[r - 1]) r--;
-                        l++;
-                        r--;
-                    } else if (nums[l] + nums[r] < sum) {
-                        l++;
-                    } else {
-                        r--;
-                    }
+            if (i > 0 && nums[i] == nums[i - 1]) continue; // prevent duplicate at the start
+            int l = i + 1, r = nums.length - 1;
+            while (l < r) {
+                int sum = nums[i] + nums[l] + nums[r];
+                if (sum > 0) {
+                    r--;
+                } else if (sum == 0) {
+                    res.add(new ArrayList<>(Arrays.asList(nums[i], nums[l], nums[r])));
+                    while (l < r && nums[l] == nums[l + 1]) l++; // prevent duplicates at the middle/end
+                    while (l < r && nums[r] == nums[r - 1]) r--;
+                    l++;
+                    r--;
+                    while (l < nums.length - 1 && nums[l] == nums[l + 1]) l++;
+                } else {
+                    l++;
                 }
             }
         }
@@ -343,46 +334,19 @@ public class ArrayQns {
 
     /**
      * 347. Top K Frequent Elements
-     * TODO: note the use of PriorityQueue<Map.Entry<Integer, Integer>>
+     * Seems faster than using PriorityQueue<Map.Entry<Integer, Integer>>
      */
-    public int[] topKFrequent2(int[] nums, int k) {
-        if (k == nums.length) return nums;
-        Map<Integer, Integer> counts = new HashMap<>(); // key, count
-        for (int num : nums) counts.put(num, counts.getOrDefault(num, 0) + 1);
-
-        PriorityQueue<Map.Entry<Integer, Integer>> maxHeap = new PriorityQueue<>((a, b) -> b.getValue() - a.getValue());
-        maxHeap.addAll(counts.entrySet());
-        int[] list = new int[k];
-        while (k > 0) {
-            list[k - 1] = maxHeap.poll().getKey();
-            k--;
-        }
-
-        return list;
-    }
-
     public int[] topKFrequent(int[] nums, int k) {
-        Map<Integer, Integer> counts = new HashMap<>();
-        List<Integer>[] buckets = new List[nums.length + 1];
-
-        for (int i : nums) counts.put(i, counts.getOrDefault(i, 0) + 1);
-
-        for (int num : counts.keySet()) {
-            int count = counts.get(num);
-            if (buckets[count] == null) buckets[count] = new ArrayList<>();
-            buckets[count].add(num);
-        }
-
+        if (nums.length == 0) return new int[0];
+        Map<Integer, Integer> map = new HashMap<>();
+        PriorityQueue<int[]> heap = new PriorityQueue<int[]>((a, b) -> b[0] - a[0]);
         int[] res = new int[k];
-        int curr = 0;
-        for (int i = buckets.length - 1; i >= 0 && curr < k; i--) {
-            if (buckets[i] != null) {
-                for (int num : buckets[i]) {
-                    if (curr == k) break;
-                    res[curr++] = num;
-                }
-            }
+
+        for (int n : nums) map.put(n, map.getOrDefault(n, 0) + 1);
+        for (Map.Entry<Integer, Integer> keyVal : map.entrySet()) {
+            heap.add(new int[]{keyVal.getValue(), keyVal.getKey()});
         }
+        for (int i = 0; i < k; i++) res[i] = heap.poll()[1];
         return res;
     }
 
@@ -416,45 +380,34 @@ public class ArrayQns {
         return res;
     }
 
-    //    128
+    //    128. Longest Consecutive Sequence
     public int longestConsecutive(int[] nums) {
         Set<Integer> set = new HashSet<>();
-        Integer max = 0;
+        int count = 1;
         for (int n : nums) set.add(n);
         for (int n : set) {
             if (!set.contains(n - 1)) {
                 int m = n + 1;
-                while (set.contains(m)) m++;
-                max = Math.max(max, m - n);
+                while (set.contains(m)) {
+                    m += 1;
+                    count = Math.max(count, m - n);
+                }
             }
         }
-        return max;
+        return count;
     }
 
-    /**
-     * 238
-     * 1    2   3   4   5   6
-     * 1    1   2   6   24  120
-     * 720  360 120 30  6   1
-     */
-    public static int[] productExceptSelf(int[] nums) {
-        int[] prefix = new int[nums.length];
-
-        prefix[0] = nums[0];
-        for (int i = 1; i < nums.length - 1; i++) {
-            prefix[i] = nums[i] * prefix[i - 1];
+    //    238. Product of Array Except Self
+    public int[] productExceptSelf(int[] nums) {
+        int n = nums.length;
+        int[] res = new int[n];
+        res[0] = 1;
+        for (int i = 1; i < n; i++) res[i] = res[i - 1] * nums[i - 1];
+        int right = 1;
+        for (int i = n - 1; i >= 0; i--) {
+            if (i < n - 1) right *= nums[i + 1];
+            res[i] *= right;
         }
-        prefix[nums.length - 1] = prefix[nums.length - 2];
-
-        System.out.println(Arrays.toString(prefix));
-        int suffix = nums[nums.length - 1];
-
-        for (int i = nums.length - 2; i > 0; i--) {
-            prefix[i] = suffix * prefix[i - 1];
-            suffix *= nums[i];
-        }
-        prefix[0] = suffix;
-
-        return prefix;
+        return res;
     }
 }

@@ -8,10 +8,22 @@ import static org.junit.Assert.assertTrue;
 
 public class StringQns {
     public static void main(String[] args) {
-        List<Integer> res = partitionLabels("ccebabdaeddebeaeaaec");
-        System.out.println(res);
 
     }
+
+    //    49. Group Anagrams
+    public List<List<String>> groupAnagrams(String[] strs) {
+        if (strs == null || strs.length == 0) return new ArrayList<>();
+        Map<String, List<String>> map = new HashMap<>();
+        for (String s : strs) {
+            char[] chars = s.toCharArray();
+            Arrays.sort(chars);
+            String keyStr = String.valueOf(chars);
+            map.computeIfAbsent(keyStr, k -> new ArrayList<>()).add(s);
+        }
+        return new ArrayList<>(map.values());
+    }
+
 
     //    763. Partition Labels
     public static List<Integer> partitionLabels(String s) {

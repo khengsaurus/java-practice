@@ -1,20 +1,59 @@
 package Sandbox;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 public class Sandbox {
     public static void main(String[] arg) {
-        TreeSet<Integer> s = new TreeSet<>();
-//        s = (TreeSet<Integer>) s.descendingSet();
-        s.add(0);
-        s.add(3);
-        s.add(2);
-        s.add(1);
-        s.add(4);
-        System.out.println(s);
-        System.out.println(s.lower(5));
-        System.out.println(new ArrayList(s));
+
+    }
+
+    /**
+     * 215. Kth Largest Element in an Array
+     * Smart! Think outside the box!
+     * Quick select: https://www.youtube.com/watch?v=XEmy13g1Qxc
+     */
+    public int findKthLargest(int[] nums, int k) {
+        PriorityQueue<Integer> heap = new PriorityQueue<>();
+        for (int num : nums) {
+            heap.add(num);
+            if (heap.size() > k) heap.poll();
+        }
+        return heap.peek();
+    }
+
+    public int countPaths(int n, int[][] roads) {
+        final long mod = 1000000007;
+        int[][] adj = new int[n][n];
+        for (int[] road : roads) {
+            adj[road[0]][road[1]] = road[2];
+            adj[road[1]][road[0]] = road[2];
+        }
+        long[] countPaths = new long[n], cost = new long[n];
+        Arrays.fill(cost, -1);
+        Queue<long[]> q = new PriorityQueue<>(Comparator.comparingLong(v -> v[1]));
+        countPaths[0] = 1;
+        cost[0] = 0;
+        q.add(new long[]{0, 0});
+
+        while (!q.isEmpty()) {
+            long[] curr = q.poll();
+            int currNode = (int) curr[0];
+            if (currNode == n - 1) return (int) (countPaths[currNode] % mod);
+            long currCost = curr[1];
+            for (int nextNode = 0; nextNode < n; nextNode++) {
+                int nextCost = adj[currNode][nextNode];
+                if (nextCost == 0) continue;
+                long newCost = currCost + nextCost;
+                if (newCost == cost[nextNode]) {
+                    countPaths[nextNode] += countPaths[currNode] % mod;
+                } else if (cost[nextNode] == -1 || cost[nextNode] > newCost) {
+                    countPaths[nextNode] = countPaths[currNode];
+                    cost[nextNode] = newCost;
+                    q.offer(new long[]{nextNode, newCost});
+                }
+            }
+        }
+        return (int) (countPaths[n - 1] % mod);
     }
 
     //    202. Happy Number
@@ -33,28 +72,6 @@ public class Sandbox {
 
         }
         return false;
-    }
-
-    //    31
-    public static void nextPermutation(int[] nums) {
-        int len = nums.length;
-        boolean flag = false;
-        for (int i = len - 1; i > 0; i--) {
-            if (nums[i - 1] < nums[i]) {
-                int t = nums[i];
-                nums[i] = nums[i - 1];
-                nums[i - 1] = t;
-                flag = true;
-                break;
-            }
-        }
-        if (!flag) {
-            for (int i = 0; i < len / 2; i++) {
-                int t = nums[i];
-                nums[i] = nums[len - i - 1];
-                nums[len - i - 1] = t;
-            }
-        }
     }
 
     //    287

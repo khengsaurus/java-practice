@@ -2,6 +2,37 @@ import java.util.*;
 
 public class BackTrackingQns {
 
+
+    //    131. Palindrome Partitioning
+    List<List<String>> res131;
+    ArrayList<String> curr131;
+
+    public List<List<String>> partition(String s) {
+        res131 = new ArrayList<>();
+        curr131 = new ArrayList<>();
+        backtrack131(s, 0);
+        return res131;
+    }
+
+    public void backtrack131(String s, int start) {
+        if (curr131.size() > 0 && start >= s.length()) {
+            res131.add(new ArrayList<>(curr131));
+        }
+        for (int i = start; i < s.length(); i++) {
+            if (isPalindrome(s, start, i)) {
+                curr131.add(s.substring(start, i + 1));
+                backtrack131(s, i + 1);
+                curr131.remove(curr131.size() - 1);
+            }
+        }
+    }
+
+    public boolean isPalindrome(String str, int l, int r) {
+        if (l == r) return true;
+        while (l < r) if (str.charAt(l++) != str.charAt(r--)) return false;
+        return true;
+    }
+
     //    51. N-Queens
     private boolean[] usedCols;
     private boolean[] pDiag;
@@ -191,7 +222,7 @@ public class BackTrackingQns {
 
         private void backtrack(int start, int n, int remaining, Deque<Integer> currComb) {
             if (remaining == 0) {
-                result.add(new LinkedList(currComb)); // create new obj here, else this will be a reference
+                result.add(new LinkedList<>(currComb)); // create new obj here, else this will be a reference
                 return;
             }
             for (int i = start; i <= n - remaining + 1; i++) { // the decision tree
@@ -230,7 +261,7 @@ public class BackTrackingQns {
     }
 
     public void backtrack39(int[] nums, int target, int start, int curSum, List<List<Integer>> combos, Deque<Integer> combo) {
-        if (curSum == target) combos.add(new ArrayList(combo));
+        if (curSum == target) combos.add(new ArrayList<>(combo));
         while (start < nums.length) {
             if (nums[start] <= target - curSum) {
                 combo.offerLast(nums[start]);

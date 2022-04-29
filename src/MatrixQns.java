@@ -4,10 +4,55 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class MatrixQns {
-    public static void main(String[] args) {
-//        int[][] r = new int[][]{{1, 2, 3, 4, 5}, {2, 2, 3, 4, 5}, {3, 2, 3, 4, 5}, {4, 2, 3, 4, 5}, {5, 2, 3, 4, 5}};
-//        List<List<Integer>> arr = shiftGrid(r, 5);
-//        for (List<Integer> a : arr) System.out.println(a);
+    //    59. Spiral Matrix II
+    public int[][] generateMatrix(int n) {
+        int[][] res = new int[n][n];
+        int curr = 1, top = 0, bottom = n - 1, left = 0, right = n - 1;
+        while (curr <= n * n) {
+            // right
+            for (int i = left; i <= right; i++) res[top][i] = curr++;
+            top++;
+            // down
+            for (int i = top; i <= bottom; i++) res[i][right] = curr++;
+            right--;
+            // left
+            for (int i = right; i >= left; i--) res[bottom][i] = curr++;
+            bottom--;
+            // up
+            for (int i = bottom; i >= top; i--) res[i][left] = curr++;
+            left++;
+        }
+        return res;
+    }
+
+    //    54. Spiral Matrix
+    public List<Integer> spiralOrder(int[][] matrix) {
+        List<Integer> res = new ArrayList<Integer>();
+        if (matrix.length == 0) return res;
+
+        int rowBegin = 0, rowEnd = matrix.length - 1, colBegin = 0, colEnd = matrix[0].length - 1;
+        while (rowBegin <= rowEnd && colBegin <= colEnd) {
+            // Right
+            for (int j = colBegin; j <= colEnd; j++) res.add(matrix[rowBegin][j]);
+            rowBegin++;
+            // Down
+            for (int j = rowBegin; j <= rowEnd; j++) res.add(matrix[j][colEnd]);
+            colEnd--;
+
+            // Left
+            if (rowBegin <= rowEnd) {
+                for (int j = colEnd; j >= colBegin; j--) res.add(matrix[rowEnd][j]);
+            }
+            rowEnd--;
+
+            // Up
+            if (colBegin <= colEnd) {
+                for (int j = rowEnd; j >= rowBegin; j--) res.add(matrix[j][colBegin]);
+            }
+            colBegin++;
+        }
+
+        return res;
     }
 
     public static int[] shiftLeft(int[] arr, int k) {

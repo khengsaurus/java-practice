@@ -15,7 +15,7 @@ class Dijkstra {
         dist[src] = 0;
 
         for (int count = 0; count < nodes - 1; count++) {
-            int u = minDistance(dist, visited);
+            int u = vertexWithMinDistance(dist, visited);
             visited[u] = true;
 
             for (int v = 0; v < nodes; v++)
@@ -35,7 +35,7 @@ class Dijkstra {
     A utility function to find the vertex with minimum distance value,
     from the set of vertices not yet included in the shortest path tree
      */
-    int minDistance(int[] dist, boolean[] visited) {
+    int vertexWithMinDistance(int[] dist, boolean[] visited) {
         int minCost = Integer.MAX_VALUE, minNode = -1;
         for (int v = 0; v < visited.length; v++) {
             if (!visited[v] && dist[v] <= minCost) {
@@ -83,12 +83,11 @@ class Dijkstra {
             adj[r[1]].add(new int[]{r[0], r[2]});
         }
         long[] cost = new long[n], countPaths = new long[n];
-        Arrays.fill(cost, -1); // -1 -> not visited
-        // Queue of [node, cost], explore the cheapest paths first
-        Queue<long[]> queue = new PriorityQueue<>((l, r) -> Long.compare(l[1], r[1]));
-        queue.offer(new long[]{0, 0});
-        countPaths[0] = 1; // Intuitive? To make path accumulation work
+        Arrays.fill(cost, -1);
+        Queue<long[]> queue = new PriorityQueue<>(Comparator.comparingLong(v -> v[1]));
+        countPaths[0] = 1;
         cost[0] = 0;
+        queue.offer(new long[]{0, 0});
 
         while (!queue.isEmpty()) {
             long[] curr = queue.poll();
@@ -102,8 +101,8 @@ class Dijkstra {
                 } else if (cost[nextNode[0]] == -1 || cost[nextNode[0]] > newCost) {
                     // newNode not been reached before || curr path to get there cheaper than previously found paths
                     countPaths[nextNode[0]] = countPaths[currNode];
-                    queue.offer(new long[]{nextNode[0], newCost});
                     cost[nextNode[0]] = newCost;
+                    queue.offer(new long[]{nextNode[0], newCost});
                 }
             }
         }

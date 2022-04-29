@@ -5,6 +5,38 @@ class GraphQns implements HasDirs {
     }
 
     /**
+     * 1631. Path With Minimum Effort
+     * Use dijkstra's with an int[][] dist to memoize the greatest dist required to get to any cell.
+     * If a cell can be reached with dist < dist[r][c] update dist[r][c] and offer from that cell.
+     */
+    int[] DIR = new int[]{0, 1, 0, -1, 0};
+
+    public int minimumEffortPath(int[][] heights) {
+        int rows = heights.length, cols = heights[0].length;
+        int[][] distances = new int[rows][cols];
+        for (int i = 0; i < rows; i++) Arrays.fill(distances[i], Integer.MAX_VALUE);
+
+        PriorityQueue<int[]> minHeap = new PriorityQueue<>(Comparator.comparingInt(a -> a[0]));
+        minHeap.offer(new int[]{0, 0, 0}); // distance, row, col
+        while (!minHeap.isEmpty()) {
+            int[] curr = minHeap.poll();
+            int dist = curr[0], row = curr[1], col = curr[2];
+            if (row == rows - 1 && col == cols - 1) break;
+            if (dist > distances[row][col]) continue;
+            for (int i = 0; i < 4; i++) {
+                int nextRow = row + DIR[i], nextCol = col + DIR[i + 1];
+                if (nextRow < 0 || nextRow >= rows || nextCol < 0 || nextCol >= cols) continue;
+                int newDist = Math.max(dist, Math.abs(heights[nextRow][nextCol] - heights[row][col]));
+                if (distances[nextRow][nextCol] > newDist) {
+                    distances[nextRow][nextCol] = newDist;
+                    minHeap.offer(new int[]{newDist, nextRow, nextCol});
+                }
+            }
+        }
+        return distances[rows - 1][cols - 1];
+    }
+
+    /**
      * 329. Longest Increasing Path in a Matrix
      * Can be done via top sort/bfs too
      */

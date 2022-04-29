@@ -5,8 +5,28 @@ import java.util.TreeMap;
 
 public class LinkedListQns {
     public static void main(String[] args) {
-        ListNode a = new ListNode(1, new ListNode(2, new ListNode(3, new ListNode(4, new ListNode(5)))));
-        swapNodes(a, 2);
+        System.out.println(9 % 10);
+    }
+
+    //    2. Add Two Numbers
+    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+        int carry = 0;
+        ListNode preRes = new ListNode(), head = null;
+        while (l1 != null || l2 != null) {
+            int sum = (l1 == null ? 0 : l1.val) + (l2 == null ? 0 : l2.val) + carry;
+            int v = sum % 10;
+            carry = sum / 10;
+            if (head == null) {
+                head = new ListNode(v);
+                preRes.next = head;
+            } else {
+                head.next = new ListNode(v);
+                head = head.next;
+            }
+            if (l1 != null) l1 = l1.next;
+            if (l2 != null) l2 = l2.next;
+        }
+        return preRes.next;
     }
 
     //    1721
@@ -84,29 +104,26 @@ public class LinkedListQns {
         return slow;
     }
 
-    public static ListNode mergeKLists(ListNode[] lists) {
-        if (lists.length == 0) {
-            return null;
-        }
-        PriorityQueue<Integer> queue = new PriorityQueue<>();
+    //    23. Merge k Sorted Lists
+    public ListNode mergeKLists(ListNode[] lists) {
+        if (lists.length == 0) return null;
+        if (lists.length == 1) return lists[0];
+
+        PriorityQueue<ListNode> heap = new PriorityQueue<>((a, b) -> a.val - b.val);
         for (ListNode head : lists) {
             while (head != null) {
-                // use a PQ here because it prioritises min val
-                queue.add(head.val);
+                heap.offer(head);
                 head = head.next;
             }
         }
-        ListNode head = null;
-        ListNode pointer = null;
-        while (!queue.isEmpty()) {
-            ListNode newNode = new ListNode(queue.remove());
-            if (head == null) {
-                head = newNode;
-                pointer = head;
-            } else {
-                pointer.next = newNode;
-                pointer = pointer.next;
-            }
+        if (heap.isEmpty()) return null;
+        ListNode head = heap.poll();
+        ListNode pointer = head;
+        while (!heap.isEmpty()) {
+            ListNode newNode = heap.poll();
+            newNode.next = null;
+            pointer.next = newNode;
+            pointer = pointer.next;
         }
         return head;
     }
