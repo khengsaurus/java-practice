@@ -1,7 +1,51 @@
 import java.util.*;
 
 public class BackTrackingQns {
+    //    216. Combination Sum III
+    List<List<Integer>> res216;
+    ArrayDeque<Integer> curr216;
 
+    public List<List<Integer>> combinationSum3(int k, int n) {
+        res216 = new ArrayList<>();
+        curr216 = new ArrayDeque<>();
+        if (n == 45 && k == 9) res216.add(new ArrayList<>(List.of(1, 2, 3, 4, 5, 6, 7, 8, 9)));
+        if (n > 1 && n < 45) backtrack216(k, n, 1);
+        return res216;
+    }
+
+    public void backtrack216(int k, int n, int start) {
+        if (n == 0 && k == 0) res216.add(new ArrayList<>(curr216));
+        while (start < 10 && k > 0) {
+            if (start > n) break;
+            curr216.addLast(start);
+            backtrack216(k - 1, n - start, start + 1);
+            curr216.removeLast();
+            start++;
+        }
+    }
+
+    //    40. Combination Sum II
+    List<List<Integer>> res40;
+
+    public List<List<Integer>> combinationSum2(int[] candidates, int target) {
+        Arrays.sort(candidates);
+        res40 = new ArrayList<>();
+        backtrack40(candidates, new ArrayList<>(), 0, target);
+        return res40;
+    }
+
+    public void backtrack40(int[] nums, List<Integer> curr, int start, int target) {
+        if (target == 0) res40.add(new ArrayList<>(curr));
+        if (start >= nums.length) return;
+        for (int i = start; i < nums.length; i++) {
+            if (i > start && nums[i] == nums[i - 1]) continue;
+            if (nums[i] <= target) {
+                curr.add(nums[i]);
+                backtrack40(nums, curr, i + 1, target - nums[i]);
+                curr.remove(curr.size() - 1);
+            }
+        }
+    }
 
     //    131. Palindrome Partitioning
     List<List<String>> res131;

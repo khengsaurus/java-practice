@@ -3,6 +3,42 @@ import Sandbox.Node;
 import java.util.*;
 
 public class TreeQns {
+    // 1008. Construct Binary Search Tree from Preorder Traversal
+    public TreeNode bstFromPreorder(int[] preorder) {
+        int len = preorder.length;
+        if (len == 0) return null;
+        int rightStart = 0, rootVal = preorder[0];
+        TreeNode root = new TreeNode(rootVal);
+        if (len == 1) return root;
+
+        for (int i = 0; i < len; i++) {
+            if (preorder[i] > rootVal) {
+                rightStart = i;
+                break;
+            }
+        }
+        if (rightStart == 0) {
+            root.left = bstFromPreorder(Arrays.copyOfRange(preorder, 1, len));
+        } else {
+            root.left = bstFromPreorder(Arrays.copyOfRange(preorder, 1, rightStart));
+            root.right = bstFromPreorder(Arrays.copyOfRange(preorder, rightStart, len));
+        }
+        return root;
+    }
+
+    //    337. House Robber III
+    public int rob(TreeNode root) {
+        int[] res = robSub(root); // [notRob, didRob]
+        return Math.max(res[0], res[1]);
+    }
+
+    private int[] robSub(TreeNode root) {
+        if (root == null) return new int[2];
+        int[] left = robSub(root.left), right = robSub(root.right), res = new int[2];
+        res[0] = Math.max(left[0], left[1]) + Math.max(right[0], right[1]);
+        res[1] = root.val + left[0] + right[0];
+        return res;
+    }
 
     //    199. Binary Tree Right Side View
     public List<Integer> rightSideView(TreeNode root) {
@@ -129,7 +165,7 @@ public class TreeQns {
         inOrder(root.right, queue);
     }
 
-    //    124
+    //    124. Binary Tree Maximum Path Sum
     int globalMax;
 
     public int maxPathSum(TreeNode root) {
@@ -141,31 +177,9 @@ public class TreeQns {
     public int maxPath(TreeNode root) {
         if (root == null) return 0;
         int maxLeft = Math.max(0, maxPath(root.left));
-        int maxRight = Math.max(0, maxRight = maxPath(root.right));
+        int maxRight = Math.max(0, maxPath(root.right));
         globalMax = Math.max(globalMax, root.val + maxLeft + maxRight);
         return root.val + Math.max(maxLeft, maxRight);
-    }
-
-    //    143
-    public static void reorderList(ListNode head) {
-        Map<Integer, ListNode> map = new HashMap<>();
-        int count = -1;
-        while (head != null) {
-            map.put(++count, head);
-            head = head.next;
-        }
-        head = null;
-        for (int i = 0; i <= count / 2; i++) {
-            if (head == null) {
-                head = map.get(i);
-            } else {
-                head.next = map.get(i);
-                head = head.next;
-            }
-            head.next = map.get(count - i);
-            head = head.next;
-        }
-        head.next = null;
     }
 
     //    133
@@ -199,7 +213,7 @@ public class TreeQns {
         return bs653(root.left, k, set) || bs653(root.right, k, set);
     }
 
-    //    98
+    //    98. Validate Binary Search Tree
     public boolean isValidBST(TreeNode root) {
         return isValidBST(root, Long.MIN_VALUE, Long.MAX_VALUE);
     }
@@ -223,35 +237,41 @@ public class TreeQns {
     public boolean isSafeNode(int[][] graph, int[] safe, int node) {
         if (graph[node].length == 0) return true;
         if (safe[node] != 0) return safe[node] == 1;
-        safe[node] = 4; // visited
+        safe[node] = 2; // visited
         boolean isSafe = true;
         for (int next : graph[node]) {
-            if (safe[next] == 4) {
-                isSafe = false;
-                break;
-            }
-            isSafe = isSafe && isSafeNode(graph, safe, next);
+            isSafe = isSafeNode(graph, safe, next);
             if (!isSafe) break;
         }
         safe[node] = isSafe ? 1 : 2;
         return isSafe;
     }
 
-    public static List<Integer> traversal(TreeNode root) {
-        List<Integer> rv = new ArrayList<>();
-        if (root != null) dfs(root, rv);
-        return rv;
+    //    104. Maximum Depth of Binary Tree
+    public int minDepth(TreeNode root) {
+        if (root == null) return 0;
+        int left = minDepth(root.left);
+        int right = minDepth(root.right);
+        return 1 + ((left == 0 || right == 0) ? left + right : Math.min(left, right));
     }
 
-    private static void dfs(TreeNode node, List<Integer> rv) {
-//        rv.add(node.val); // <-- preOrder
-        if (node.left != null) {
-            dfs(node.left, rv);
+    //    102. Binary Tree Level Order Traversal
+    public List<List<Integer>> levelOrder(TreeNode root) {
+        List<List<Integer>> levels = new ArrayList<>();
+        if (root == null) return levels;
+        Queue<TreeNode> toVisit = new LinkedList<>();
+        toVisit.add(root);
+        while (!toVisit.isEmpty()) {
+            List<Integer> level = new ArrayList<>();
+            int size = toVisit.size();
+            while (size-- > 0) {
+                TreeNode curr = toVisit.remove();
+                level.add(curr.val);
+                if (curr.left != null) toVisit.add(curr.left);
+                if (curr.right != null) toVisit.add(curr.right);
+            }
+            levels.add(level);
         }
-        rv.add(node.val); // <-- inOrder
-        if (node.right != null) {
-            dfs(node.right, rv);
-        }
-//        rv.add(node.val); // <-- postOrder
+        return levels;
     }
 }

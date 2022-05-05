@@ -1,10 +1,196 @@
+import org.junit.Test;
+
 import java.util.*;
 
+import static org.junit.Assert.assertEquals;
+
 public class ArrayQns {
+    public static void main(String[] args) {
+        canPartition(new int[]{1, 5, 3, 8, 5});
+    }
+
+    //    1679. Max Number of K-Sum Pairs
+    public int maxOperationsBS(int[] nums, int k) {
+        Arrays.sort(nums);
+        int i = 0, j = nums.length - 1, count = 0;
+        while (i < j) {
+            int sum = nums[i] + nums[j];
+            if (sum == k) {
+                count++;
+                i++;
+                j--;
+            } else if (sum > k)
+                j--;
+            else
+                i++;
+        }
+
+        return count;
+    }
+
+    public int maxOperations(int[] nums, int k) {
+        Map<Integer, Integer> map = new HashMap<>();
+        int count = 0;
+        for (int n : nums) {
+            if (n > k) continue;
+            int diff = k - n, diffCount = map.getOrDefault(diff, 0);
+            if (diffCount > 0) {
+                map.put(diff, diffCount - 1);
+                count++;
+            } else {
+                map.put(n, map.getOrDefault(n, 0) + 1);
+            }
+            System.out.println(map);
+        }
+
+        return count;
+    }
+
+    /**
+     * 416. Partition Equal Subset Sum
+     * 0    1   5   3   8   5 // half = 11
+     * 1   _1   6   4   9   6
+     * 5    6  _6   9   9  11 <- return early if half found
+     * 3    9   9  _9  11   9
+     * 8    9   8  11  _8
+     * 5
+     */
+    public static boolean canPartition(int[] nums) {
+        int sum = 0, max = 0;
+        for (int n : nums) {
+            max = Math.max(max, n);
+            sum += n;
+        }
+        if (sum == 0 || sum % 2 == 1) return false;
+        int half = sum / 2;
+        if (max >= half) return max == half;
+
+        int len = nums.length;
+        int[][] dp = new int[len + 1][len];
+        dp[0] = nums;
+        for (int row = 1; row < len + 1; row++) {
+            for (int col = 0; col < len; col++) {
+                if (row != col + 1) {
+                    int r = row - 1, toAdd = nums[row - 1];
+                    boolean set = false;
+                    while (r >= 0) {
+                        int cell = dp[r--][col] + toAdd;
+                        if (cell == half) return true;
+                        if (cell < half) {
+                            dp[row][col] = cell;
+                            set = true;
+                            break;
+                        }
+                    }
+                    if (!set) dp[row][col] = dp[row - 1][col];
+                } else {
+                    dp[row][col] = dp[row - 1][col];
+                }
+            }
+        }
+        return false;
+    }
+
+    //    581. Shortest Unsorted Continuous Subarray
+    public static int findUnsortedSubarray(int[] nums) {
+        int len = nums.length, end = 0, start = 1;
+        int max = nums[0], min = nums[len - 1];
+        for (int l = 0, r = len - 1; l < len; l++, r--) {
+            max = Math.max(max, nums[l]);
+            min = Math.min(min, nums[r]);
+            if (nums[l] < max) end = l;
+            if (nums[r] > min) start = r;
+        }
+        return end - start + 1;
+    }
+
+    //    905. Sort Array By Parity
+    public int[] sortArrayByParity(int[] nums) {
+        if (nums == null || nums.length <= 1) return nums;
+        int i = 0;
+        for (int j = 0; j < nums.length; j++) {
+            if (nums[j] % 2 == 0) {
+                int t = nums[i];
+                nums[i++] = nums[j];
+                nums[j] = t;
+            }
+        }
+        return nums;
+    }
+
+    //    680. Valid Palindrome II
+    public boolean validPalindrome(String s) {
+        int l = 0, r = s.length() - 1;
+        while (l < r) {
+            if (s.charAt(l) != s.charAt(r)) {
+                return isPalindrome(s, l + 1, r) || isPalindrome(s, l, r - 1);
+            }
+            l++;
+            r--;
+        }
+        return true;
+    }
+
+    public static boolean isPalindrome(String s, int l, int r) {
+        while (l < r) {
+            if (s.charAt(l++) != s.charAt(r--)) return false;
+        }
+        return true;
+    }
+
+    //    844. Backspace String Compare
+    public boolean backspaceCompare(String s, String t) {
+        int i = s.length() - 1, j = t.length() - 1;
+        int skipS = 0, skipT = 0;
+        while (i >= 0 || j >= 0) {
+            while (i >= 0 && (skipS > 0 || s.charAt(i) == '#')) {
+                if (s.charAt(i) == '#') skipS++;
+                else skipS--;
+                i--;
+            }
+            while (j >= 0 && (skipT > 0 || t.charAt(j) == '#')) {
+                if (t.charAt(j) == '#') skipT++;
+                else skipT--;
+                j--;
+            }
+            char left = i < 0 ? '#' : s.charAt(i), right = j < 0 ? '#' : t.charAt(j);
+            if (left != right) return false;
+            i--;
+            j--;
+        }
+        return true;
+    }
+
+    //    16. 3Sum Closest
+    public int threeSumClosest(int[] nums, int target) {
+        Arrays.sort(nums);
+        int sum = nums[0] + nums[1] + nums[nums.length - 1];
+        int closestSum = sum;
+
+        for (int i = 0; i < nums.length - 2; i++) {
+            if (i > 0 && nums[i] == nums[i - 1]) continue;
+            int left = i + 1, right = nums.length - 1;
+            while (left < right) {
+                sum = nums[left] + nums[right] + nums[i];
+                if (sum < target) {
+                    while (left < right && nums[left] == nums[left + 1]) left++;
+                    left++;
+                } else if (sum > target) {
+                    while (left < right && nums[right] == nums[right - 1]) right--;
+                    right--;
+                } else {
+                    return sum;
+                }
+                if (Math.abs(target - sum) < Math.abs(target - closestSum)) closestSum = sum;
+            }
+
+        }
+        return closestSum;
+    }
 
     //    31. Next Permutation
     public void nextPermutation(int[] nums) {
-        if(nums == null || nums.length <= 1) return;
+        if (nums == null || nums.length <= 1) return;
         int i = nums.length - 2;
 
         while (i >= 0 && nums[i] >= nums[i + 1]) i--;
@@ -14,7 +200,7 @@ public class ArrayQns {
             int j = nums.length - 1;
             while (nums[j] <= nums[i]) j--;
             swap(nums, i, j);
-            reverse(nums, i+1, nums.length-1);
+            reverse(nums, i + 1, nums.length - 1);
         }
     }
 
@@ -54,58 +240,6 @@ public class ArrayQns {
             }
         }
         return total;
-    }
-
-    /**
-     * 416. Partition Equal Subset Sum
-     * Failed attempt using sliding window
-     * Appropriate solution for finding a consecutive sub-sequence of a sorted array with value == total/2
-     */
-    public static boolean canPartitionDP(int[] nums) {
-        int max = 0, total = 0;
-        for (int n : nums) {
-            total += n;
-            max = Math.max(max, n);
-        }
-        if (max * 2 > total) return false;
-
-        int[][] dp = new int[nums.length + 2][nums.length];
-        for (int i = 0; i < nums.length; i++) dp[1][i] = nums[i];
-        for (int row = 2; row < nums.length + 2; row++) {
-            for (int col = 0; col < nums.length; col++) {
-                if (row - 2 == col) { // same number, cannot take
-                    dp[row][col] = dp[row - 1][col];
-                } else {
-                    int prevRow = row - 1, toAdd = nums[row - 2], newVal = dp[prevRow][col] + toAdd;
-                    while (prevRow > 0 && newVal * 2 > total) {
-                        newVal = dp[--prevRow][col] + toAdd;
-                    }
-                    if (newVal * 2 == total) return true;
-                    dp[row][col] = newVal;
-                }
-            }
-        }
-        return false;
-    }
-
-    public boolean canPartitionFailed(int[] nums) {
-        int total = 0, windowSum = 0, l = 0, r = 0;
-//        Arrays.sort(nums);
-        for (int n : nums) total += n;
-
-        // init window
-        while (windowSum * 2 < total) windowSum += nums[r++];
-
-        while (l <= r && r < nums.length && windowSum * 2 != total) {
-            if (windowSum * 2 > total) {
-                windowSum -= nums[l++];
-            } else if (windowSum * 2 < total) {
-                windowSum += nums[r++];
-            }
-            if (r < l) r++;
-        }
-
-        return windowSum * 2 == total;
     }
 
     //    1855. Maximum Distance Between a Pair of Values, Two pointers

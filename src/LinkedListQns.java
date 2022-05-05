@@ -1,11 +1,67 @@
-import java.util.HashMap;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.TreeMap;
+import java.util.*;
 
 public class LinkedListQns {
-    public static void main(String[] args) {
-        System.out.println(9 % 10);
+    //    143. Reorder List
+    public void reorderList(ListNode head) {
+        if (head == null || head.next == null || head.next.next == null) return;
+        List<ListNode> list = new ArrayList<>();
+        int count = 0;
+        while (head != null) {
+            list.add(head);
+            head = head.next;
+            count++;
+        }
+        head = null;
+        for (int i = 0; i < (count + 1) / 2; i++) {
+            if (head == null) head = list.get(i);
+            else {
+                head.next = list.get(i);
+                head = head.next;
+            }
+            if (i <= count / 2) {
+                head.next = list.get(count - i - 1);
+                head = head.next;
+            }
+        }
+        head.next = null;
+    }
+
+    public void reorderListBetter(ListNode head) {
+        if (head == null || head.next == null || head.next.next == null) return;
+        // Cut the list into two halves, prev will be the tail of 1st half, slow will be the head of 2nd half
+        ListNode prev = null, slow = head, fast = head;
+        while (fast != null && fast.next != null) {
+            prev = slow;
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+
+        prev.next = null;
+
+        ListNode tail = reverseLinkedList(slow); // step 2. reverse the 2nd half
+        merge(head, tail); // step 3. merge the two halves
+    }
+
+    ListNode reverseLinkedList(ListNode head) {
+        ListNode prev = null, curr = head, next;
+        while (curr != null) {
+            next = curr.next;
+            curr.next = prev;
+            prev = curr;
+            curr = next;
+        }
+        return prev;
+    }
+
+    void merge(ListNode l1, ListNode l2) {
+        while (l1 != null) {
+            ListNode n1 = l1.next, n2 = l2.next;
+            l1.next = l2;
+            if (n1 == null) break;
+            l2.next = n1;
+            l1 = n1;
+            l2 = n2;
+        }
     }
 
     //    2. Add Two Numbers

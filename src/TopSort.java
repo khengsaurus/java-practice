@@ -5,6 +5,77 @@ public class TopSort implements HasDirs {
         longestIncreasingPath(new int[][]{{9, 9, 4}, {6, 6, 8}, {2, 1, 1}});
     }
 
+    //    802. Find Eventual Safe States - top sort performs much worse than dfs
+    public static List<Integer> eventualSafeNodes(int[][] graph) {
+        int n = graph.length;
+        int[] degree = new int[n];
+        boolean isSafe[] = new boolean[n];
+        Queue<Integer> q = new LinkedList<>();
+        HashSet<Integer>[] neighbours = new HashSet[n];
+        for (int i = 0; i < n; i++) neighbours[i] = new HashSet<>();
+
+        for (int i = 0; i < n; i++) {
+            if (graph[i].length == 0) {
+                isSafe[i] = true;
+                q.offer(i);
+            } else {
+                for (int v : graph[i]) neighbours[v].add(i);
+                degree[i] = graph[i].length;
+            }
+        }
+
+        while (!q.isEmpty()) {
+            int curr = q.poll();
+            isSafe[curr] = true;
+            for (int v : neighbours[curr]) {
+                degree[v]--;
+                if (degree[v] == 0) q.offer(v);
+            }
+        }
+
+        ArrayList<Integer> res = new ArrayList<>();
+        for (int i = 0; i < n; i++) if (isSafe[i]) res.add(i);
+        return res;
+    }
+
+    public int longestIncreasingPath2(int[][] matrix) {
+        int[] DIRS = new int[]{0, 1, 0, -1, 0};
+        int rows = matrix.length, cols = matrix[0].length;
+        int[][] inDegree = new int[rows][cols];
+        LinkedList<int[]> q = new LinkedList<>();
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                int curr = matrix[i][j];
+                for (int k = 0; k < 4; k++) {
+                    int ni = i + DIRS[k], nj = j + DIRS[k + 1];
+                    if (ni < 0 || nj < 0 || ni >= rows || nj >= cols) continue;
+                    if (matrix[ni][nj] < curr) inDegree[i][j]++;
+                }
+                if (inDegree[i][j] == 0) q.add(new int[]{i, j});
+            }
+        }
+
+        int count = 0;
+//        for (int[] r : inDegree) System.out.println(Arrays.toString(r));
+        while (!q.isEmpty()) {
+            int size = q.size();
+            while (size-- > 0) {
+                int[] curr = q.poll();
+                int i = curr[0], j = curr[1], val = matrix[i][j];
+                for (int k = 0; k < 4; k++) {
+                    int ni = i + DIRS[k], nj = j + DIRS[k + 1];
+                    if (ni < 0 || nj < 0 || ni >= rows || nj >= cols) continue;
+                    if (matrix[ni][nj] > val && --inDegree[ni][nj] == 0) {
+                        q.add(new int[]{ni, nj});
+                    }
+                }
+            }
+            count++;
+        }
+        return count;
+    }
+
     /**
      * 207. Course Schedule via Top sort
      * [1,0]: to take course 1 you need to finish course 0

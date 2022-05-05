@@ -7,6 +7,27 @@ public class Sandbox {
 
     }
 
+    //    1041. Robot Bounded In Circle
+    public boolean isRobotBounded(String instructions) {
+        int[][] dirs = new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+        int x = 0, y = 0, dir = 0;
+        char[] chars = instructions.toCharArray();
+        for (int iter = 0; iter < 4; iter++) {
+            for (char c : chars) {
+                switch (c) {
+                    case 'L' -> dir = (dir + 3) % 4;
+                    case 'R' -> dir = (dir + 1) % 4;
+                    case 'G' -> {
+                        x += dirs[dir][0];
+                        y += dirs[dir][1];
+                    }
+                }
+            }
+            if (x == 0 && y == 0) return true;
+        }
+        return false;
+    }
+
     /**
      * 215. Kth Largest Element in an Array
      * Smart! Think outside the box!
@@ -19,41 +40,6 @@ public class Sandbox {
             if (heap.size() > k) heap.poll();
         }
         return heap.peek();
-    }
-
-    public int countPaths(int n, int[][] roads) {
-        final long mod = 1000000007;
-        int[][] adj = new int[n][n];
-        for (int[] road : roads) {
-            adj[road[0]][road[1]] = road[2];
-            adj[road[1]][road[0]] = road[2];
-        }
-        long[] countPaths = new long[n], cost = new long[n];
-        Arrays.fill(cost, -1);
-        Queue<long[]> q = new PriorityQueue<>(Comparator.comparingLong(v -> v[1]));
-        countPaths[0] = 1;
-        cost[0] = 0;
-        q.add(new long[]{0, 0});
-
-        while (!q.isEmpty()) {
-            long[] curr = q.poll();
-            int currNode = (int) curr[0];
-            if (currNode == n - 1) return (int) (countPaths[currNode] % mod);
-            long currCost = curr[1];
-            for (int nextNode = 0; nextNode < n; nextNode++) {
-                int nextCost = adj[currNode][nextNode];
-                if (nextCost == 0) continue;
-                long newCost = currCost + nextCost;
-                if (newCost == cost[nextNode]) {
-                    countPaths[nextNode] += countPaths[currNode] % mod;
-                } else if (cost[nextNode] == -1 || cost[nextNode] > newCost) {
-                    countPaths[nextNode] = countPaths[currNode];
-                    cost[nextNode] = newCost;
-                    q.offer(new long[]{nextNode, newCost});
-                }
-            }
-        }
-        return (int) (countPaths[n - 1] % mod);
     }
 
     //    202. Happy Number
@@ -88,7 +74,6 @@ public class Sandbox {
     }
 
     public static int findDuplicateTortHare(int[] nums) {
-//        https://www.geeksforgeeks.org/find-any-one-of-the-multiple-repeating-elements-in-read-only-array-set-2
         int tortoise = nums[0], hare = nums[0];
         do {
             tortoise = nums[tortoise];

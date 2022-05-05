@@ -1,7 +1,52 @@
 import java.util.*;
 
 class GraphQns implements HasDirs {
-    public GraphQns() {
+    /**
+     * 399. Evaluate Division
+     * Equation & value: a,b & 2 -> a/b = 2, b,c & 3 -> b/c = 3
+     * I.e. edge a -> b weight(2), b -> a weight(0.5)
+     * Query a/c ->a/b * b/c -> 2 * 3
+     */
+    public double[] calcEquation(List<List<String>> equations, double[] values, List<List<String>> queries) {
+        Map<String, Map<String, Double>> graph = buildGraph(equations, values);
+        double[] result = new double[queries.size()];
+
+        for (int i = 0; i < queries.size(); i++) {
+            List<String> q = queries.get(i);
+            result[i] = getPathWeight(q.get(0), q.get(1), new HashSet<>(), graph);
+        }
+        return result;
+    }
+
+    private Map<String, Map<String, Double>> buildGraph(List<List<String>> equations, double[] values) {
+        Map<String, Map<String, Double>> graph = new HashMap<>();
+
+        for (int i = 0; i < equations.size(); i++) {
+            List<String> eqn = equations.get(i);
+            String u = eqn.get(0), v = eqn.get(1);
+            graph.computeIfAbsent(u, k -> new HashMap<>()).put(v, values[i]);
+            graph.get(u).put(u, 1.0);
+            graph.computeIfAbsent(v, k -> new HashMap<>()).put(u, 1 / values[i]);
+            graph.get(v).put(v, 1.0);
+        }
+        return graph;
+    }
+
+    private double getPathWeight(String start, String end, Set<String> visited, Map<String, Map<String, Double>> graph) {
+        if (!graph.containsKey(start)) return -1.0;
+        if (start.equals(end)) return 1;
+        if (graph.get(start).containsKey(end)) return graph.get(start).get(end);
+
+        visited.add(start);
+        Map<String, Double> neighbors = graph.get(start);
+        for (Map.Entry<String, Double> neighbor : neighbors.entrySet()) {
+            String n = neighbor.getKey();
+            if (!visited.contains(n)) {
+                double weight = getPathWeight(n, end, visited, graph);
+                if (weight != -1.0) return neighbor.getValue() * weight;
+            }
+        }
+        return -1.0;
     }
 
     /**
@@ -9,8 +54,6 @@ class GraphQns implements HasDirs {
      * Use dijkstra's with an int[][] dist to memoize the greatest dist required to get to any cell.
      * If a cell can be reached with dist < dist[r][c] update dist[r][c] and offer from that cell.
      */
-    int[] DIR = new int[]{0, 1, 0, -1, 0};
-
     public int minimumEffortPath(int[][] heights) {
         int rows = heights.length, cols = heights[0].length;
         int[][] distances = new int[rows][cols];
@@ -24,7 +67,7 @@ class GraphQns implements HasDirs {
             if (row == rows - 1 && col == cols - 1) break;
             if (dist > distances[row][col]) continue;
             for (int i = 0; i < 4; i++) {
-                int nextRow = row + DIR[i], nextCol = col + DIR[i + 1];
+                int nextRow = row + dirs[i], nextCol = col + dirs[i + 1];
                 if (nextRow < 0 || nextRow >= rows || nextCol < 0 || nextCol >= cols) continue;
                 int newDist = Math.max(dist, Math.abs(heights[nextRow][nextCol] - heights[row][col]));
                 if (distances[nextRow][nextCol] > newDist) {
@@ -541,7 +584,7 @@ class GraphQns implements HasDirs {
         return dist;
     }
 
-    //    1091
+    //    1091. Shortest Path in Binary Matrix
     public static int shortestPathBinaryMatrix(int[][] grid) {
         if (grid == null || grid.length == 0 || grid[0] == null || grid[0].length == 0) return 0;
         Queue<int[]> queue = new LinkedList();
@@ -572,7 +615,7 @@ class GraphQns implements HasDirs {
     }
 
 
-    // 417
+    //    417. Pacific Atlantic Water Flow
     public List<List<Integer>> pacificAtlanticBFS(int[][] heights) {
         /**
          * 19 ms, faster than 28.00%
@@ -593,24 +636,20 @@ class GraphQns implements HasDirs {
             atlQueue.add(new int[]{rows - 1, i});
         }
 
-        boolean[][] pacVisited = bfs417(heights, pacQueue);
-        boolean[][] atlVisited = bfs417(heights, atlQueue);
+        boolean[][] pacVisited = bfs417(heights, pacQueue), atlVisited = bfs417(heights, atlQueue);
 
         List<List<Integer>> common = new ArrayList<>();
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                if (pacVisited[i][j] && atlVisited[i][j])
+                if (pacVisited[i][j] && atlVisited[i][j]) {
                     common.add(Arrays.asList(i, j));
+                }
             }
         }
         return common;
     }
 
     public List<List<Integer>> pacificAtlanticDFS(int[][] heights) {
-        /**
-         * 3 ms, faster than 99.66%
-         * 43.5 MB, less than 87.64%
-         */
         int rows = heights.length, cols = heights[0].length;
         boolean[][] pacVisited = new boolean[rows][cols], atlVisited = new boolean[rows][cols];
 
@@ -669,15 +708,12 @@ class GraphQns implements HasDirs {
         if (j - 1 >= 0 && heights[i][j - 1] >= currHeight) dfs417(heights, i, j - 1, visited);
     }
 
-    //    1162
+    //    1162. As Far from Land as Possible
     public static int maxDistance(int[][] grid) {
-        if (grid == null || grid.length == 0)
-            return -1;
-        int rows = grid.length;
-        int cols = grid[0].length;
+        if (grid == null || grid.length == 0) return -1;
+        int rows = grid.length, cols = grid[0].length;
         boolean[][] visited = new boolean[rows][cols];
-        int res = bfs1162(grid, visited, rows, cols);
-        return res;
+        return bfs1162(grid, visited, rows, cols);
     }
 
     public static int bfs1162(int[][] grid, boolean[][] visited, int rows, int cols) {
@@ -696,14 +732,11 @@ class GraphQns implements HasDirs {
             int row = current[0], col = current[1];
             for (int[] dir : fourDirs) {
                 int nextI = row + dir[0], nextJ = col + dir[1];
-                if (nextI < 0 || nextJ < 0 || nextI >= rows || nextJ >= cols || visited[nextI][nextJ]) {
-                    continue;
-                } else {
-                    visited[nextI][nextJ] = true;
-                    grid[nextI][nextJ] = grid[row][col] + 1;
-                    result = Math.max(result, grid[nextI][nextJ]);
-                    queue.offer(new int[]{nextI, nextJ});
-                }
+                if (nextI < 0 || nextJ < 0 || nextI >= rows || nextJ >= cols || visited[nextI][nextJ]) continue;
+                visited[nextI][nextJ] = true;
+                grid[nextI][nextJ] = grid[row][col] + 1;
+                result = Math.max(result, grid[nextI][nextJ]);
+                queue.offer(new int[]{nextI, nextJ});
             }
         }
 
@@ -735,13 +768,12 @@ class GraphQns implements HasDirs {
     public void reduceGrid2(int[][] grid1, int[][] grid2, int row, int col) {
         if (row < 0 || col < 0 || row >= grid1.length || col >= grid1[0].length || grid2[row][col] == 0) return;
         grid2[row][col] = 0;
-        reduceGrid2(grid1, grid2, row + 1, col);
-        reduceGrid2(grid1, grid2, row - 1, col);
-        reduceGrid2(grid1, grid2, row, col + 1);
-        reduceGrid2(grid1, grid2, row, col - 1);
+        for (int i = 0; i < 4; i++) {
+            reduceGrid2(grid1, grid2, row + dirs[i], col + dirs[i + 1]);
+        }
     }
 
-    //    1020
+    //    1020. Number of Enclaves
     public int numEnclaves(int[][] grid) {
         int count = 0;
         int rows = grid.length;
@@ -768,13 +800,12 @@ class GraphQns implements HasDirs {
     public void convertToSea(int[][] grid, int row, int col) {
         if (row < 0 || col < 0 || row >= grid.length || col >= grid[0].length || grid[row][col] == 0) return;
         grid[row][col] = 0;
-        convertToSea(grid, row + 1, col);
-        convertToSea(grid, row - 1, col);
-        convertToSea(grid, row, col + 1);
-        convertToSea(grid, row, col - 1);
+        for (int i = 0; i < 4; i++) {
+            convertToSea(grid, row + dirs[i], col + dirs[i + 1]);
+        }
     }
 
-    //    130
+    //    130. Surrounded Regions
     public void solve(char[][] board) {
         int m = board.length;
         int n = board[0].length;
@@ -797,10 +828,9 @@ class GraphQns implements HasDirs {
     public void clearFromSides(char[][] board, int row, int col) {
         if (row < 0 || col < 0 || row >= board.length || col >= board[0].length || board[row][col] != 'O') return;
         board[row][col] = '#';
-        clearFromSides(board, row + 1, col);
-        clearFromSides(board, row - 1, col);
-        clearFromSides(board, row, col + 1);
-        clearFromSides(board, row, col - 1);
+        for (int i = 0; i < 4; i++) {
+            clearFromSides(board, row + dirs[i], col + dirs[i + 1]);
+        }
     }
 
     /**
@@ -821,13 +851,12 @@ class GraphQns implements HasDirs {
     public void clearLand(char[][] grid, int row, int col) {
         if (row < 0 || col < 0 || row >= grid.length || col >= grid[0].length || grid[row][col] == '0') return;
         grid[row][col] = '0';
-        clearLand(grid, row + 1, col);
-        clearLand(grid, row - 1, col);
-        clearLand(grid, row, col + 1);
-        clearLand(grid, row, col - 1);
+        for (int i = 0; i < 4; i++) {
+            clearLand(grid, row + dirs[i], col + dirs[i + 1]);
+        }
     }
 
-    //    773
+    //    733. Flood Fill
     public static int[][] floodFill(int[][] image, int sr, int sc, int newColor) {
         int oldColor = image[sr][sc];
         if (oldColor == newColor) return image;
@@ -835,14 +864,13 @@ class GraphQns implements HasDirs {
         return image;
     }
 
-    public static void fill(int[][] image, int sr, int sc, int oldColor, int newColor, int m, int n) {
-        if (sr < 0 || sc < 0 || sr >= m || sc >= n) return;
-        if (image[sr][sc] == oldColor) {
-            image[sr][sc] = newColor;
-            fill(image, sr - 1, sc, oldColor, newColor, m, n);
-            fill(image, sr + 1, sc, oldColor, newColor, m, n);
-            fill(image, sr, sc - 1, oldColor, newColor, m, n);
-            fill(image, sr, sc + 1, oldColor, newColor, m, n);
+    public static void fill(int[][] image, int row, int col, int oldColor, int newColor, int m, int n) {
+        if (row < 0 || col < 0 || row >= m || col >= n) return;
+        if (image[row][col] == oldColor) {
+            image[row][col] = newColor;
+            for (int i = 0; i < 4; i++) {
+                fill(image, row + dirs[i], col + dirs[i + 1], oldColor, newColor, m, n);
+            }
         }
     }
 }

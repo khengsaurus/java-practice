@@ -1,16 +1,10 @@
 import org.junit.Test;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class StringQns {
-    public static void main(String[] args) {
-
-    }
-
     //    49. Group Anagrams
     public List<List<String>> groupAnagrams(String[] strs) {
         if (strs == null || strs.length == 0) return new ArrayList<>();
@@ -34,11 +28,11 @@ public class StringQns {
         for (int i = 0; i < sLen; i++) last[s.charAt(i) - 'a'] = i;
 
         List<Integer> list = new ArrayList<>();
-        int nextReq = last[s.charAt(0) - 'A'];
+        int nextReq = last[s.charAt(0) - 'a'];
         int count = 0;
         for (int i = 0; i < sLen; i++) {
             count++;
-            nextReq = Math.max(nextReq, last[s.charAt(i) - 'A']);
+            nextReq = Math.max(nextReq, last[s.charAt(i) - 'a']);
             if (i == nextReq) {
                 list.add(count);
                 count = 0;
@@ -49,39 +43,16 @@ public class StringQns {
         return list;
     }
 
-
-//    public static List<Integer> partitionLabelsBetter(String s) {
-//        int sLen = s.length();
-//        int[] last = new int[26];
-//        for (int i = 0; i < sLen; i++) {
-//            last[s.charAt(i) - 'a'] = i;
-//        }
-//        int left = 0;
-//        List<Integer> list = new ArrayList<>();
-//
-//        while (left < sLen) {
-//            int right = last[s.charAt(left) - 'a'];
-//            for (int i = left; i < right; i++) {
-//                right = Math.max(right, last[s.charAt(i) - 'a']);
-//            }
-//            list.add(right - left + 1);
-//            left = right + 1;
-//        }
-//        return list;
-//    }
-//
-
     //    424 - Longest repeating character replacement
     public static int characterReplacement(String s, int k) {
         if (k >= s.length()) return s.length();
-        int l = 0, r = 0, max = 0, maxRepeatedCharsInWindow = 0;
+        int l = 0, r = 0, max = 0, maxRepeated = 0;
         int[] memo = new int[26];
         while (r < s.length()) {
             int newCharCount = ++memo[s.charAt(r) - 'A'];
-            if (newCharCount > maxRepeatedCharsInWindow) maxRepeatedCharsInWindow = newCharCount;
-            if (r - l + 1 - maxRepeatedCharsInWindow > k) memo[s.charAt(l++) - 'A']--;
-            max = Math.max(max, r - l + 1);
-            r++;
+            if (newCharCount > maxRepeated) maxRepeated = newCharCount;
+            if (r - l + 1 - maxRepeated > k) memo[s.charAt(l++) - 'A']--;
+            max = Math.max(max, r++ - l + 1);
         }
         return max;
     }
@@ -342,7 +313,7 @@ public class StringQns {
         return 0;
     }
 
-    // 76
+    //    76. Minimum Window Substring
     public static String minWindow(String s, String t) {
         if (s == null || s.isEmpty() || t == null || t.isEmpty()) return "";
         int tLen = t.length(), sLen = s.length();
@@ -354,21 +325,16 @@ public class StringQns {
 
         while (right < sLen) {
             if (found < tLen) {
-                // if the count of that required char <= required count, found ++
-                int c = s.charAt(right++);
-                if (tMap[c] > 0) {
-                    if (++sMap[c] <= tMap[c]) found++;
-                }
+                int newChar = s.charAt(right++);
+                if (tMap[newChar] > 0 && ++sMap[newChar] <= tMap[newChar]) found++;
             }
             while (found == tLen) {
                 if (right - left < len) {
                     len = right - left;
                     coors = new int[]{left, right};
                 }
-                int c = s.charAt(left);
-                if (tMap[c] > 0) {
-                    if (--sMap[c] < tMap[c]) found--;
-                }
+                int oldChar = s.charAt(left);
+                if (tMap[oldChar] > 0 && --sMap[oldChar] < tMap[oldChar]) found--;
                 left++;
             }
         }
@@ -391,16 +357,18 @@ public class StringQns {
     }
 
 
-    // 3 - Sliding window approach
+    //    3. Longest Substring Without Repeating Characters
     public int lengthOfLongestSubstring(String s) {
-        int result = 0, left = 0;
-        int[] cache = new int[256];
-        for (int right = 0; right < s.length(); right++) {
-            left = (cache[s.charAt(right)] > 0) ? Math.max(left, cache[s.charAt(right)]) : left;
-            cache[s.charAt(right)] = right + 1;
-            result = Math.max(result, right - left + 1);
+        int res = 0, l = 0, r = 0, len = s.length();
+        if (len <= 1) return len;
+        int[] memo = new int[256];
+        while (r < len) {
+            char c = s.charAt(r);
+            if (memo[c] > 0) l = Math.max(l, memo[c]);
+            memo[c] = r + 1;
+            res = Math.max(res, ++r - l);
         }
-        return result;
+        return res;
     }
 
     //    242

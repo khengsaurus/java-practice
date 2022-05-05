@@ -1,10 +1,16 @@
 package Algos;
 
+import javax.rmi.ssl.SslRMIClientSocketFactory;
 import java.util.*;
 
 /**
- * Shortest path from source to all vertices
+ * Dijkstra's: shortest path from source to all vertices
+ * -> explore the shortest paths via minheap and update the count of visited nodes
  * https://www.geeksforgeeks.org/dijkstras-shortest-path-algorithm-greedy-algo-7/
+ * Space complexity:
+ * - adjacency list O(V + E), O(V^2) if vertices are all connected
+ * - adjacency matrix O(V^2)
+ * Time complexity: O(V^2) or O(E log V) with a binary heap
  */
 class Dijkstra {
     void dijkstra(int graph[][], int src) {
@@ -67,6 +73,38 @@ class Dijkstra {
         };
         Dijkstra t = new Dijkstra();
         t.dijkstra(graph, 0);
+    }
+
+    /**
+     * 743. Network Delay Time
+     *
+     */
+    public int networkDelayTime(int[][] times, int n, int k) {
+        HashMap<Integer, List<int[]>> adj = new HashMap<>();
+        for (int[] v : times) {
+            int from = v[0], to = v[1], time = v[2];
+            adj.computeIfAbsent(from, a -> new ArrayList<>()).add(new int[]{to, time});
+        }
+
+        PriorityQueue<int[]> heap = new PriorityQueue<>(Comparator.comparingInt(a -> a[1])); // [to, time]
+        heap.add(new int[]{k, 0});
+
+        int max = -1;
+        boolean[] visited = new boolean[n + 1];
+        while (n > 0) {
+            if (heap.isEmpty()) return -1;
+            int[] currTime = heap.poll();
+            int curr = currTime[0], time = currTime[1];
+            if (visited[curr]) continue;
+            visited[curr] = true;
+            n--;
+            max = Math.max(max, time);
+            if (!adj.containsKey(curr)) continue;
+            for (int[] next : adj.get(curr)) {
+                heap.add(new int[]{next[0], next[1] + time});
+            }
+        }
+        return max;
     }
 
     /**

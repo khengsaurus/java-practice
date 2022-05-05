@@ -5,28 +5,41 @@ import java.util.*;
 import static org.junit.Assert.assertTrue;
 
 public class DPQns {
-    /**
-     * 123. Best Time to Buy and Sell Stock III
-     * Context: consider the cost price
-     */
-    public int maxProfit4(int[] prices) {
+    //    188. Best Time to Buy and Sell Stock IV
+    public static int maxProfit4(int k, int[] prices) {
+        int days = prices.length;
+        if (days <= 1) return 0;
+        int[] dp1 = new int[days], dp2;
+
+        for (int txn = 1; txn < k + 1; txn++) {
+            dp2 = new int[days];
+            int maxPrevTxnWCost = -prices[0];
+            for (int day = 1; day < days; day++) {
+                maxPrevTxnWCost = Math.max(maxPrevTxnWCost, dp1[day - 1] - prices[day - 1]);
+                dp2[day] = Math.max(dp2[day - 1], maxPrevTxnWCost + prices[day]);
+            }
+            dp1 = dp2;
+        }
+        return dp1[days - 1];
+    }
+
+    //    123. Best Time to Buy and Sell Stock III
+    public int maxProfit3(int[] prices) {
         int days = prices.length;
         if (days <= 1) return 0;
         int[][] profits = new int[3][days];
 
         for (int txn = 1; txn < 3; txn++) {
-            int maxAmt = -prices[0]; // cost price
+            int maxPrevTxnWCost = -prices[0];
             for (int day = 1; day < days; day++) {
-                /* maxAmt on txn,day = maxProfit of txn ending on prevDay
-                   AND minimum (cost) price on any prevDay before day */
-                maxAmt = Math.max(maxAmt, profits[txn - 1][day - 1] - prices[day - 1]);
-                profits[txn][day] = Math.max(profits[txn][day - 1], maxAmt + prices[day]);
+                maxPrevTxnWCost = Math.max(maxPrevTxnWCost, profits[txn - 1][day - 1] - prices[day - 1]);
+                profits[txn][day] = Math.max(profits[txn][day - 1], maxPrevTxnWCost + prices[day]);
             }
         }
         return profits[2][days - 1];
     }
 
-    public int maxProfit4AmazingSln(int[] prices) {
+    public int maxProfit3AmazingSln(int[] prices) {
         int buy1 = Integer.MAX_VALUE, buy2 = Integer.MAX_VALUE;
         int profit1 = 0, profit2 = 0;
         for (int p : prices) {
@@ -238,11 +251,9 @@ public class DPQns {
 
     public static int dfs309(int[] prices, int day, boolean canBuy) {
         if (day >= prices.length) return 0;
-        if (canBuy) {
-            if (buy[day] != 0) return buy[day];
-        } else if (sell[day] != 0) {
-            return sell[day];
-        }
+        if (canBuy && buy[day] != 0) return buy[day];
+        else if (sell[day] != 0) return sell[day];
+
         int noAction = dfs309(prices, day + 1, canBuy);
         if (canBuy) {
             buy[day] = Math.max(noAction, dfs309(prices, day + 1, false) - prices[day]);
@@ -569,27 +580,27 @@ public class DPQns {
         return new int[]{};
     }
 
+    //    91. Decode Ways
     public static int numDecodings(String s) {
         if (s.charAt(0) == '0') return 0;
         int sLen = s.length();
         if (sLen == 1) return 1;
         int[] dp = new int[sLen + 1];
         dp[0] = 1;
-        dp[1] = 1; // if here, means the first char can be parsed by itself
+        dp[1] = 1;
         for (int i = 1; i < sLen; i++) {
             int currN = Character.getNumericValue(s.charAt(i));
             int prevN = Character.getNumericValue(s.charAt(i - 1));
             if (currN == 0) {
-                if (prevN == 0) return 0; // 00 cannot be parsed
+                if (prevN == 0) return 0;
                 if (prevN > 2) {
-                    dp[i + 1] = 0; // 40 -> no way to parse
+                    dp[i + 1] = 0;
                 } else {
-                    dp[i] = dp[i - 1]; // regress! 12 (2 ways) -> 120 (1 way)
                     dp[i + 1] = dp[i];
                 }
             } else {
-                dp[i + 1] = dp[i]; // can be parsed multiple ways
-                if (prevN > 0 && ((prevN * 10) + currN < 27)) {
+                dp[i + 1] = dp[i];
+                if (prevN * 10 + currN < 27) {
                     dp[i + 1] += dp[i - 1];
                 }
             }

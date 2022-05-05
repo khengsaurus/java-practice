@@ -1,5 +1,6 @@
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Stack;
 
 import static org.junit.Assert.assertTrue;
@@ -13,7 +14,7 @@ public class BSTTraversal {
      */
     public static boolean isValidPreOrderTraversal(int[] nodes) {
         if (nodes.length <= 1) return true;
-        Stack<Integer> parents = new Stack<Integer>();
+        Stack<Integer> parents = new Stack<>();
         int leftLimit = -Integer.MAX_VALUE; // left grand^n parent
         for (int newNode : nodes) {
             if (newNode < leftLimit) return false;

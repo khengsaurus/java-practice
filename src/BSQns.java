@@ -1,10 +1,26 @@
 import java.util.*;
 
 public class BSQns {
-    public static void main(String[] args) {
-    }
-
-    public BSQns() {
+    //    410. Split Array Largest Sum
+    public int splitArray(int[] nums, int m) {
+        int minSize = 0, maxSize = 0;
+        for (int num : nums) {
+            minSize = Math.max(minSize, num);
+            maxSize += num;
+        }
+        while (minSize <= maxSize) {
+            int mid = (minSize + maxSize) / 2;
+            int buckets = 0, i = 0;
+            while (i < nums.length) {
+                int currBucketSize = 0;
+                while (i < nums.length && nums[i] + currBucketSize <= mid) currBucketSize += nums[i++];
+                if (++buckets > m) break;
+            }
+            if (buckets <= m) {
+                maxSize = mid - 1;
+            } else minSize = mid + 1;
+        }
+        return minSize;
     }
 
     //    1855. Maximum Distance Between a Pair of Values, Binary search
@@ -28,8 +44,10 @@ public class BSQns {
 
     /**
      * 99. Recover Binary Search Tree
-     * In-order traversal TODO!!!
-     * Think of it as a in-order validation - an in-order BST array will be sorted ascending!!!
+     * Model it as an in-order traversal
+     * Think of it as an in-order validation - an in-order BST array will be sorted ascending:
+     * Valid in-order: [1,2,3,4,5]
+     * Invalid: [1,5,3,4,2]
      */
     TreeNode prev = null, first = null, second = null;
 

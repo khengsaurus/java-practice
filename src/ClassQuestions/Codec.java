@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Deque;
 import java.util.LinkedList;
 
+//    297. Serialize and Deserialize Binary Tree
 public class Codec {
     private static final String split = ",";
     private static final String NN = "X";
@@ -14,13 +15,10 @@ public class Codec {
         return sb.toString();
     }
 
-    // Build string top down!
     private void buildString(TreeNode node, StringBuilder sb) {
         if (node == null) {
-//            System.out.println(NN);
             sb.append(NN).append(split);
         } else {
-//            System.out.println(node.val);
             sb.append(node.val).append(split);
             buildString(node.left, sb);
             buildString(node.right, sb);
@@ -28,23 +26,16 @@ public class Codec {
     }
 
     public TreeNode deserialize(String data) {
-//        System.out.println();
         Deque<String> nodes = new LinkedList<>(Arrays.asList(data.split(split)));
         return buildTree(nodes);
     }
 
-    // Build tree bottom up!
     private TreeNode buildTree(Deque<String> nodes) {
-        String val = nodes.remove();
-        if (val.equals(NN)) {
-//            System.out.println(NN);
-            return null;
-        } else {
-            TreeNode node = new TreeNode(Integer.parseInt(val));
-            node.left = buildTree(nodes);
-            node.right = buildTree(nodes);
-//            System.out.println(val);
-            return node;
-        }
+        String val = nodes.pollFirst();
+        if (val == null || val.equals(NN)) return null;
+        TreeNode node = new TreeNode(Integer.parseInt(val));
+        node.left = buildTree(nodes);
+        node.right = buildTree(nodes);
+        return node;
     }
 }

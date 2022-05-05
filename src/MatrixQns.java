@@ -4,6 +4,31 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class MatrixQns {
+    public static void main(String[] args) {
+        rotate(new int[][]{{10, 20, 30, 40}, {50, 60, 70, 80}, {90, 10, 11, 12}, {13, 14, 15, 16}});
+    }
+
+    //    48. Rotate Image - take my knees pls
+    public static void rotate(int[][] matrix) {
+        int n = matrix.length;
+        // l is the side length of the matrix we are processing
+        for (int len = n; len > 1; len -= 2) {
+            // left is the start index of the matrix we are processing
+            int left = (n - len) / 2;
+            // right is the end index of the matrix we are processing
+            int right = left + len - 1;
+            for (int i = 0; i < len - 1; i++) {
+                // move number on one side to the other side clockwise
+                int temp = matrix[right - i][left];
+                matrix[right - i][left] = matrix[right][right - i];
+                matrix[right][right - i] = matrix[left + i][right];
+                matrix[left + i][right] = matrix[left][left + i];
+                matrix[left][left + i] = temp;
+            }
+        }
+        return;
+    }
+
     //    59. Spiral Matrix II
     public int[][] generateMatrix(int n) {
         int[][] res = new int[n][n];

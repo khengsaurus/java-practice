@@ -1,5 +1,7 @@
 import org.junit.Test;
+
 import java.util.*;
+
 import static org.junit.Assert.assertTrue;
 
 public class DS {
@@ -19,36 +21,6 @@ public class DS {
         if (left == null || right == null) return left == right;
         if (left.val != right.val) return false;
         return isSymmetricHelp(left.left, right.right) && isSymmetricHelp(left.right, right.left);
-    }
-
-    // 104
-    public int minDepth(TreeNode root) {
-        if (root == null) return 0;
-        int left = minDepth(root.left);
-        int right = minDepth(root.right);
-        return 1 + ((left == 0 || right == 0) ? left + right : Math.min(left, right));
-    }
-
-    //    102
-    public List<List<Integer>> levelOrder(TreeNode root) {
-        List<List<Integer>> levels = new ArrayList<>();
-        if (root == null) return levels;
-        Queue<TreeNode> toVisit = new LinkedList<>();
-        toVisit.add(root);
-        while (!toVisit.isEmpty()) {
-            List<Integer> level = new ArrayList<>();
-            int size = toVisit.size();
-            while (size-- > 0) {
-                TreeNode curr = toVisit.poll();
-                if (curr != null) {
-                    level.add(curr.val);
-                    if (curr.left != null) toVisit.add(curr.left);
-                    if (curr.right != null) toVisit.add(curr.right);
-                }
-            }
-            levels.add(level);
-        }
-        return levels;
     }
 
     // 946. Validate Stack Sequences
