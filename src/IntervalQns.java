@@ -1,11 +1,18 @@
 import java.util.*;
 
 public class IntervalQns {
-    public static void main(String[] args) {
-        int[][] res = merge(new int[][]{{1, 3}, {0, 0}});
-        for (int[] i : res) {
-            System.out.println(Arrays.toString(i));
+    //    435. Non-overlapping Intervals
+    public int eraseOverlapIntervals(int[][] intervals) {
+        Arrays.sort(intervals, Comparator.comparingInt(a -> a[1]));
+        int count = 0, end = intervals[0][1];
+        for (int[] interval : intervals) {
+            if (interval[0] >= end) {
+                end = interval[1];
+            } else {
+                count++;
+            }
         }
+        return count - 1;
     }
 
     //    56. Merge Intervals

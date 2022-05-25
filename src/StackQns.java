@@ -3,55 +3,85 @@ import java.util.*;
 /*
 Decreasing mono-stack: popping the completed stack consecutively will return increasing elements.
  */
-public class MonoStack {
-    public static void main(String[] args) {
-        int res = sumSubarrayMins(new int[]{4, 2, 3, 5, 1});
-        System.out.println(res);
+public class StackQns {
+    //    32. Longest Valid Parentheses
+    public int longestValidParentheses(String s) {
+        int len = s.length();
+        int[] dp = new int[len];
+        int open = 0, max = 0;
+
+        for (int i = 0; i < len; i++) {
+            if (s.charAt(i) == '(') open++;
+            else {
+                if (open > 0) {
+                    dp[i] = 2 + dp[i - 1];
+                    int prev = i - dp[i];
+                    if (prev > 0) dp[i] += dp[prev];
+                    open--;
+                }
+            }
+            if (dp[i] > max) max = dp[i];
+        }
+        return max;
     }
 
-    /**
-     * 907. Sum of Subarray Minimums TODO: help idgi
-     * [4, 2, 3, 5, 1] <-- array
-     * [1, 2, 1, 1, 5] <-- count of subarrays ending with [i] and [i] is the min element
-     * [4, 4, 3, 5, 5] <-- contributions to res
-     * [4, 4, 7, 12, 5] <-- dp: contribution of [i] and prev min
-     * <p>
-     * Equivalent to:
-     * [1, 4, 2, 1, 5] <-- count of subarrays where [i] is the min element
-     * [4, 8, 6, 5, 5] <-- contribution of [i]
-     */
-    public static int sumSubarrayMins(int[] arr) {
-        Stack<Integer> stack = new Stack<>(); // mono increasing stack
-        int[] dp = new int[arr.length + 1];
-        int[] prevMinCont = new int[arr.length + 1];
-        int[] subarrayCount = new int[arr.length + 1];
-        int[] cont = new int[arr.length + 1];
-        stack.push(-1);
-        int res = 0, MOD = (int) 1e9 + 7;
-        for (int i = 0; i < arr.length; i++) {
-            /* Find the previous smallest element. Pop larger elements - increasing stack  */
-            while (stack.peek() != -1 && arr[stack.peek()] >= arr[i]) stack.pop();
-            /* Contribution of an element being the frequency it is the smallest element
-            in surrounding sub arrays, i.e. [2,1,3] -> value of 1 = 4 */
-            int PLECont = dp[stack.peek() + 1];
-            prevMinCont[i + 1] = PLECont;
-            /* Number of elements to PLE, including self.
-            0 -> the smallest element so far
-            1 -> previous element was smaller */
-            int rightMinusLeft = i - stack.peek();
-            subarrayCount[i + 1] = rightMinusLeft;
-            int currCont = rightMinusLeft * arr[i];
-            cont[i + 1] = currCont;
-            dp[i + 1] = PLECont + currCont;
-            res = (res + dp[i + 1]) % MOD;
+    //    1209. Remove All Adjacent Duplicates in String II
+    public String removeDuplicates(String s, int k) {
+        ArrayDeque<Adjacent> stack = new ArrayDeque<>(s.length());
+        if (s.length() < k) return s;
+        for (char c : s.toCharArray()) {
+            if (!stack.isEmpty() && stack.peekLast()._char == c) {
+                stack.peekLast()._count++;
+            } else {
+                stack.addLast(new Adjacent(c, 1));
+            }
+            if (!stack.isEmpty() && stack.peekLast()._count == k) stack.removeLast();
+        }
+        StringBuilder sb = new StringBuilder();
+        for (Adjacent a : stack) {
+            sb.append(String.valueOf(a._char).repeat(a._count));
+        }
+        return sb.toString();
+    }
+
+    static class Adjacent {
+        public char _char;
+        public int _count;
+
+        public Adjacent(char c, int count) {
+            this._char = c;
+            this._count = count;
+        }
+    }
+
+    //    456. 132 Pattern TODO
+    public boolean find132pattern(int[] nums) {
+        int len = nums.length;
+        if (len < 3) return false;
+        Deque<Integer> stack = new ArrayDeque<>();
+        int k = -1;
+        for (int i = len - 1; i >= 0; i--) {
+            if (k > -1 && nums[i] < nums[k]) return true;
+            while (!stack.isEmpty() && nums[i] > nums[stack.peek()]) k = stack.pop();
             stack.push(i);
         }
-//        System.out.println("   " + Arrays.toString(arr));
-//        System.out.println(Arrays.toString(subarrayCount) + "<- subarrayCount");
-//        System.out.println(Arrays.toString(cont) + "<- cont");
-//        System.out.println(Arrays.toString(prevMinCont) + "<- prevMinCont");
-//        System.out.println(Arrays.toString(dp) + "<- dp");
-        return res;
+        return false;
+    }
+
+    //    907. Sum of Subarray Minimums TODO
+    public static int sumSubarrayMins(int[] arr) {
+        Stack<Integer> stack = new Stack<>();
+        int[] dp = new int[arr.length + 1];
+        stack.push(-1);
+        int result = 0, M = (int) 1e9 + 7;
+        for (int i = 0; i < arr.length; i++) {
+            while (stack.peek() != -1 && arr[i] <= arr[stack.peek()]) stack.pop();
+            dp[i + 1] = (dp[stack.peek() + 1] + (i - stack.peek()) * arr[i]) % M;
+            stack.push(i);
+            result += dp[i + 1];
+            result %= M;
+        }
+        return result;
     }
 
     //    1130. Minimum Cost Tree From Leaf Values

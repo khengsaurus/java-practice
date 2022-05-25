@@ -5,6 +5,35 @@ import java.util.*;
 import static org.junit.Assert.assertEquals;
 
 public class StringQns {
+    //    1190. Reverse Substrings Between Each Pair of Parentheses
+    //    ByteDance 25/05/22
+    private static StringBuilder str;
+
+    public String reverseParentheses(String s) {
+        str = new StringBuilder();
+        ArrayDeque<Integer> stack = new ArrayDeque<>();
+        char[] chars = s.toCharArray();
+
+        for (int i = 0; i < chars.length; i++) {
+            if (chars[i] == '(')
+                stack.offerLast(i);
+            else if (chars[i] == ')')
+                reverse(chars, stack.pollLast(), i);
+        }
+        for (char c : chars) {
+            if (c != '(' && c != ')') str.append(c);
+        }
+        return str.toString();
+    }
+
+    private static void reverse(char[] arr, int l, int r) {
+        while (l < r) {
+            char c = arr[l];
+            arr[l++] = arr[r];
+            arr[r--] = c;
+        }
+    }
+
     //    49. Group Anagrams
     public List<List<String>> groupAnagrams(String[] strs) {
         if (strs == null || strs.length == 0) return new ArrayList<>();

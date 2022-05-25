@@ -3,9 +3,28 @@ package Sandbox;
 import java.util.*;
 
 public class Sandbox {
-    public static void main(String[] arg) {
+    List<List<Integer>> res;
 
+    public List<List<Integer>> permuteUnique(int[] nums) {
+        res = new ArrayList<>();
+        int len = nums.length;
+        Arrays.sort(nums);
+        bt(nums, new boolean[len], new ArrayList<>());
+        return res;
     }
+
+    public void bt(int[] nums, boolean[] used, List<Integer> curr) {
+        if (curr.size() == nums.length) res.add(new ArrayList<>(curr));
+        for (int i = 0; i < nums.length; i++) {
+            if (used[i] || i > 0 && nums[i] == nums[i - 1] && !used[i - 1]) continue;
+            used[i] = true;
+            curr.add(nums[i]);
+            bt(nums, used, curr);
+            used[i] = false;
+            curr.remove(curr.size() - 1);
+        }
+    }
+
 
     //    1041. Robot Bounded In Circle
     public boolean isRobotBounded(String instructions) {

@@ -2,6 +2,46 @@ import java.util.*;
 
 class GraphQns implements HasDirs {
     /**
+     * 1192. Critical Connections in a Network
+     * https://leetcode.com/problems/critical-connections-in-a-network/discuss/382638/DFS-detailed-explanation-O(orEor)-solution
+     * TODO: smart! Backtracking with dfs!
+     * ...But only the current level of search knows it finds a cycle. How does the upper level of
+     * search know if you backtrack? Let's make use of the return value of DFS: dfs function returns
+     * the minimum rank it finds. During a step of search from node u to its neighbor v, if dfs(v)
+     * returns something smaller than or equal to rank(u), then u knows its neighbor v found a cycle
+     * back to u or u's ancestor. So u knows it should discard the edge (u, v) which is in a cycle.
+     */
+    public List<List<Integer>> criticalConnections(int n, List<List<Integer>> connections) {
+        List<Integer>[] graph = new ArrayList[n];
+        for (int i = 0; i < n; i++) graph[i] = new ArrayList<>();
+        for (List<Integer> conn : connections) {
+            graph[conn.get(0)].add(conn.get(1));
+            graph[conn.get(1)].add(conn.get(0));
+        }
+        HashSet<List<Integer>> set = new HashSet<>();
+        int[] rank = new int[n];
+        Arrays.fill(rank, -2);
+        dfs1192(graph, 0, 0, rank, set);
+        return new ArrayList<>(set);
+    }
+
+    int dfs1192(List<Integer>[] graph, int node, int depth, int[] rank, HashSet<List<Integer>> set) {
+        if (rank[node] != -2) return rank[node];
+        rank[node] = depth;
+        int minDepthFound = depth;
+        for (Integer neighbor : graph[node]) {
+            if (rank[neighbor] == depth - 1 || rank[neighbor] > depth) continue;
+            int minDepth = dfs1192(graph, neighbor, depth + 1, rank, set);
+            minDepthFound = Math.min(minDepthFound, minDepth);
+            if (minDepth > depth) {
+                set.add(Arrays.asList(node, neighbor));
+            }
+        }
+        return minDepthFound;
+    }
+
+
+    /**
      * 399. Evaluate Division
      * Equation & value: a,b & 2 -> a/b = 2, b,c & 3 -> b/c = 3
      * I.e. edge a -> b weight(2), b -> a weight(0.5)
@@ -168,30 +208,29 @@ class GraphQns implements HasDirs {
         return count;
     }
 
-    //    207. Course Schedule
+    //    207. Course Schedule via dfs
     public boolean canFinish(int numCourses, int[][] prerequisites) {
         Map<Integer, List<Integer>> courseReqs = new HashMap<>();
         for (int[] courseReq : prerequisites) {
-            List<Integer> reqs = courseReqs.getOrDefault(courseReq[0], new ArrayList<>());
-            reqs.add(courseReq[1]);
-            courseReqs.put(courseReq[0], reqs);
+            courseReqs.computeIfAbsent(courseReq[0], k -> new ArrayList<>())
+                    .add(courseReq[1]);
         }
         if (courseReqs.size() > numCourses) return false;
-        for (int course : courseReqs.keySet().stream().toList()) {
-            if (!dfs207(course, courseReqs, new HashSet<Integer>())) return false;
-            courseReqs.remove(course, null);
+        for (int course : courseReqs.keySet()) {
+            if (!dfs207(course, courseReqs, new HashSet<>())) return false;
+            courseReqs.remove(course);
         }
         return true;
     }
 
     public boolean dfs207(int course, Map<Integer, List<Integer>> courseReqs, Set<Integer> visited) {
-        if (visited.contains(course)) return false;
+        if (visited.contains(course)) return false; // cycle
         List<Integer> preReqs = courseReqs.get(course);
         if (preReqs == null || preReqs.isEmpty()) return true;
         visited.add(course);
         for (int prereq : preReqs) {
             if (!dfs207(prereq, courseReqs, visited)) return false;
-            courseReqs.put(prereq, null);
+            courseReqs.remove(prereq);
         }
         visited.remove(course);
         return true;

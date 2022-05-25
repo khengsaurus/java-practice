@@ -88,30 +88,22 @@ public class TopSort implements HasDirs {
         Map<Integer, Set<Integer>> parentChild = new HashMap<>();
 
         for (int i = 0; i < prerequisites.length; i++) {
-            int parent = prerequisites[i][1];
-            int child = prerequisites[i][0];
+            int child = prerequisites[i][0], parent = prerequisites[i][1];
             inDegree[child]++;
-
             parentChild.computeIfAbsent(parent, k -> new HashSet<>()).add(child);
         }
 
-        int studied = 0;
         for (int i = 0; i < inDegree.length; i++) {
-            if (inDegree[i] == 0) {
-                q.offer(i);
-                studied++;
-            }
+            if (inDegree[i] == 0) q.offer(i);
         }
 
+        int studied = 0;
         while (!q.isEmpty()) {
             int parent = q.poll();
-            Set<Integer> children = parentChild.get(parent);
-            if (children == null) continue;
-            for (int child : children) {
-                if (--inDegree[child] == 0) {
-                    q.offer(child);
-                    studied++;
-                }
+            studied++;
+            if (!parentChild.containsKey(parent)) continue;
+            for (int child : parentChild.get(parent)) {
+                if (--inDegree[child] == 0) q.offer(child);
             }
         }
         return studied == numCourses;

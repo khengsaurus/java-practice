@@ -1,6 +1,31 @@
 import java.util.*;
 
 public class BackTrackingQns {
+    //    47. Permutations II
+    public List<List<Integer>> permuteUnique(int[] nums) {
+        Arrays.sort(nums);
+        List<List<Integer>> res = new ArrayList<>();
+        backtrack47(nums, new boolean[nums.length], res, new ArrayDeque<>());
+        return res;
+    }
+
+    public void backtrack47(int[] nums, boolean[] taken, List<List<Integer>> res, ArrayDeque<Integer> curr) {
+        if (curr.size() == nums.length) {
+            res.add(new ArrayList<>(curr));
+            return;
+        }
+        for (int i = 0; i < nums.length; i++) {
+            if (taken[i]) continue;
+            if (i == 0 || nums[i] != nums[i - 1] || !taken[i - 1]) {
+                taken[i] = true;
+                curr.offerLast(nums[i]);
+                backtrack47(nums, taken, res, curr);
+                curr.pollLast();
+                taken[i] = false;
+            }
+        }
+    }
+
     //    216. Combination Sum III
     List<List<Integer>> res216;
     ArrayDeque<Integer> curr216;

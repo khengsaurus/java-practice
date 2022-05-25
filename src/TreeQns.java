@@ -3,25 +3,68 @@ import Sandbox.Node;
 import java.util.*;
 
 public class TreeQns {
-    // 1008. Construct Binary Search Tree from Preorder Traversal
-    public TreeNode bstFromPreorder(int[] preorder) {
-        int len = preorder.length;
-        if (len == 0) return null;
-        int rightStart = 0, rootVal = preorder[0];
-        TreeNode root = new TreeNode(rootVal);
-        if (len == 1) return root;
+    /**
+     * 331. Verify Preorder Serialization of a Binary Tree
+     * Non-null nodes -> 2 outDegree (children), 1 inDegree (parent), except root
+     * Null nodes -> 1 inDegree (parent)
+     */
+    public boolean isValidSerialization(String preorder) {
+        int degrees = 1;
+        for (String node : preorder.split(",")) {
+            degrees--;
+            if (degrees < 0) return false;
+            if (!node.equals("#")) degrees += 2;
+        }
+        return degrees == 0;
+    }
 
-        for (int i = 0; i < len; i++) {
-            if (preorder[i] > rootVal) {
-                rightStart = i;
-                break;
+    public boolean isValidSerializationStack(String preorder) {
+        Stack<String> st = new Stack<>();
+        String[] strs = preorder.split(",");
+        for (String curr : strs) {
+            if (curr.equals("#")) {
+                while (!st.isEmpty() && st.peek().equals("#")) {
+                    st.pop();
+                    if (st.isEmpty()) return false;
+                    st.pop();
+                }
+            }
+            st.push(curr);
+        }
+        return st.size() == 1 && st.peek().equals("#");
+    }
+
+    //    1379. Find a Corresponding Node of a Binary Tree in a Clone of That Tree
+    TreeNode node = null;
+
+    public final TreeNode getTargetCopy(final TreeNode original, final TreeNode cloned, final TreeNode target) {
+        if (original != null) {
+            if (target == original) {
+                node = cloned;
+            } else {
+                TreeNode left = getTargetCopy(original.left, cloned.left, target);
+                if (left == null) return getTargetCopy(original.right, cloned.right, target);
+                return left;
+                //getTargetCopy(original.left, cloned.left, target);
+                //getTargetCopy(original.right, cloned.right, target);
             }
         }
-        if (rightStart == 0) {
-            root.left = bstFromPreorder(Arrays.copyOfRange(preorder, 1, len));
-        } else {
-            root.left = bstFromPreorder(Arrays.copyOfRange(preorder, 1, rightStart));
-            root.right = bstFromPreorder(Arrays.copyOfRange(preorder, rightStart, len));
+        return node;
+    }
+
+    //    117. Populating Next Right Pointers in Each Node II
+    public Node connect(Node root) {
+        if (root == null) return root;
+        ArrayDeque<Node> deque = new ArrayDeque<>();
+        deque.offerLast(root);
+        while (!deque.isEmpty()) {
+            int s = deque.size();
+            while (s-- > 0) {
+                Node curr = deque.pollFirst();
+                curr.next = s == 0 ? null : deque.peekFirst();
+                if (curr.left != null) deque.offerLast(curr.left);
+                if (curr.right != null) deque.offerLast(curr.right);
+            }
         }
         return root;
     }
@@ -182,7 +225,7 @@ public class TreeQns {
         return root.val + Math.max(maxLeft, maxRight);
     }
 
-    //    133
+    //    133. Clone Graph
     public Node cloneGraph(Node node) {
         return dfs133(node, new HashMap<>());
     }
@@ -190,14 +233,12 @@ public class TreeQns {
     public Node dfs133(Node node, HashMap<Integer, Node> map) {
         if (node == null) return null;
         if (map.containsKey(node.val)) return map.get(node.val);
-        Node newNode = new Node(node.val);
-        map.put(node.val, newNode);
-        List<Node> neighbors = new ArrayList<>();
+        Node copy = new Node(node.val, new ArrayList<>());
+        map.put(node.val, copy);
         for (Node n : node.neighbors) {
-            neighbors.add(dfs133(n, map));
+            copy.neighbors.add(dfs133(n, map));
         }
-        newNode.neighbors = neighbors;
-        return newNode;
+        return copy;
     }
 
     //    653

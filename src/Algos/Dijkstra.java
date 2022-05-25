@@ -75,10 +75,7 @@ class Dijkstra {
         t.dijkstra(graph, 0);
     }
 
-    /**
-     * 743. Network Delay Time
-     *
-     */
+    // 743. Network Delay Time
     public int networkDelayTime(int[][] times, int n, int k) {
         HashMap<Integer, List<int[]>> adj = new HashMap<>();
         for (int[] v : times) {

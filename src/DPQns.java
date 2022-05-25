@@ -5,6 +5,31 @@ import java.util.*;
 import static org.junit.Assert.assertTrue;
 
 public class DPQns {
+    /**
+     * 474. Ones and Zeroes
+     * TODO: idgi 0-1 knapsack
+     */
+    public static int findMaxForm(String[] strs, int m, int n) {
+        int[][] dp = new int[m + 1][n + 1];
+        for (String str : strs) {
+            int countZero = 0, countOne = 0;
+
+            for (char c : str.toCharArray()) {
+                if (c == '0') countZero++;
+                else countOne++;
+            }
+
+            for (int i = m; i >= countZero; i--) {
+                for (int j = n; j >= countOne; j--) {
+                    dp[i][j] = Math.max(dp[i][j], dp[i - countZero][j - countOne] + 1);
+                }
+            }
+        }
+
+        return dp[m][n];
+    }
+
+
     //    188. Best Time to Buy and Sell Stock IV
     public static int maxProfit4(int k, int[] prices) {
         int days = prices.length;
@@ -112,29 +137,16 @@ public class DPQns {
     }
 
 
-    /**
-     * 518. Coin Change 2
-     * Unbounded knapsack
-     */
-    private Integer[][] dp518;
-
-    public int changeKnapsack(int amount, int[] coins) {
-        if (amount == 0) return 1;
-        if (coins.length == 0) return 0;
-        dp518 = new Integer[coins.length][amount + 1];
-        return changeHelper(amount, coins, 0);
-    }
-
-    private int changeHelper(int amount, int[] coins, int take) {
-        if (amount == 0) return 1;
-        if (amount < 0 || take >= coins.length) return 0;
-        if (dp518[take][amount] != null) return dp518[take][amount];
-
-        int w0 = changeHelper(amount, coins, take + 1);
-        int w1 = changeHelper(amount - coins[take], coins, take);
-        int sum = w0 + w1;
-        dp518[take][amount] = sum;
-        return sum;
+    // 518. Coin Change 2 | knapsack
+    public int change(int amount, int[] coins) {
+        int[] dp = new int[amount + 1];
+        dp[0] = 1;
+        for (int coin : coins) {
+            for (int amt = 1; amt < amount + 1; amt++) {
+                if (amt >= coin) dp[amt] += dp[amt - coin];
+            }
+        }
+        return dp[amount];
     }
 
     public static boolean lemonadeChange(int[] bills) {
@@ -164,19 +176,6 @@ public class DPQns {
             }
         }
         return true;
-    }
-
-    public static int change(int amount, int[] coins) {
-        int[] dp = new int[amount + 1];
-        for (int j = 1; j <= coins.length; j++) {
-            dp[0] = 1;
-            for (int i = 1; i < amount + 1; i++) {
-                if (i - coins[j - 1] >= 0) {
-                    dp[i] += dp[i - coins[j - 1]];
-                }
-            }
-        }
-        return dp[amount];
     }
 
     //    322. Coin Change
@@ -627,10 +626,10 @@ public class DPQns {
         return Math.max(didRobLast, notRobLast);
     }
 
+
+    //    300. Longest Increasing Subsequence
     public static int lengthOfLIS(int[] nums) {
-        if (nums.length == 1) {
-            return 1;
-        }
+        if (nums.length == 1) return 1;
         List<Integer> sub = new ArrayList<Integer>();
         sub.add(nums[0]);
         for (int i = 1; i < nums.length; i++) {
@@ -638,9 +637,7 @@ public class DPQns {
                 sub.add(nums[i]);
             } else {
                 int j = 0;
-                while (sub.get(j) < nums[i]) {
-                    j++;
-                }
+                while (sub.get(j) < nums[i]) j++;
                 sub.set(j, nums[i]);
             }
         }

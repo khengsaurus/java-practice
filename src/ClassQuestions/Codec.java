@@ -10,12 +10,11 @@ public class Codec {
     private static final String NN = "X";
 
     public String serialize(TreeNode root) {
-        StringBuilder sb = new StringBuilder();
-        buildString(root, sb);
+        StringBuilder sb = buildString(root, new StringBuilder());
         return sb.toString();
     }
 
-    private void buildString(TreeNode node, StringBuilder sb) {
+    private StringBuilder buildString(TreeNode node, StringBuilder sb) {
         if (node == null) {
             sb.append(NN).append(split);
         } else {
@@ -23,6 +22,7 @@ public class Codec {
             buildString(node.left, sb);
             buildString(node.right, sb);
         }
+        return sb;
     }
 
     public TreeNode deserialize(String data) {

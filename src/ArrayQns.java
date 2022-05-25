@@ -5,8 +5,54 @@ import java.util.*;
 import static org.junit.Assert.assertEquals;
 
 public class ArrayQns {
-    public static void main(String[] args) {
-        canPartition(new int[]{1, 5, 3, 8, 5});
+    /**
+     * 354. Russian Doll Envelopes
+     * Sort by arr[0] desc, arr[1] asc -> reduce to 1 dimenison LIS problem
+     */
+    public int maxEnvelopes(int[][] envelopes) {
+        if (envelopes == null || envelopes.length == 0 || envelopes[0] == null || envelopes[0].length != 2) return 0;
+        Arrays.sort(envelopes, (env1, env2) -> (env1[0] == env2[0])
+                ? env2[1] - env1[1]
+                : env1[0] - env2[0]
+        );
+
+        return LIS354(envelopes);
+    }
+
+    private int LIS354(int[][] nums) {
+        if (nums.length == 1) return 1;
+        List<Integer> sub = new ArrayList<Integer>();
+        sub.add(nums[0][1]);
+        for (int i = 1; i < nums.length; i++) {
+            if (nums[i][1] > sub.get(sub.size() - 1)) {
+                sub.add(nums[i][1]);
+            } else {
+                int j = 0;
+                while (sub.get(j) < nums[i][1]) j++;
+                sub.set(j, nums[i][1]);
+            }
+        }
+        return sub.size();
+    }
+
+    //    621. Task Scheduler
+    public static int leastInterval(char[] tasks, int n) {
+        if (n == 0) return tasks.length;
+        int maxCount = 0, max = 0;
+        int[] count = new int[26];
+        for (char t : tasks) {
+            int countT = ++count[t - 'A'];
+            if (countT > maxCount) {
+                max = 1;
+                maxCount = countT;
+            } else if (countT == maxCount) {
+                max++;
+            }
+        }
+        int b = (maxCount - 1) * (n + 1), m = (max * maxCount);
+        int avail = b - m + max;
+        int req = tasks.length - m;
+        return b + max + Math.max(0, req - avail);
     }
 
     //    1679. Max Number of K-Sum Pairs
@@ -210,8 +256,7 @@ public class ArrayQns {
 
     //    714. Best Time to Buy and Sell Stock with Transaction Fee
     public int maxProfit(int[] prices, int fee) {
-        int prevMin = Integer.MAX_VALUE, prevMax = 0;
-        int currMax = 0, globalMax = 0;
+        int prevMin = Integer.MAX_VALUE, prevMax = 0, currMax = 0, globalMax = 0;
         for (int price : prices) {
             if (price < prevMax - fee || price <= prevMin) {
                 prevMax = price;
