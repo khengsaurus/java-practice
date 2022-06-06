@@ -58,12 +58,14 @@ public class StackQns {
     public boolean find132pattern(int[] nums) {
         int len = nums.length;
         if (len < 3) return false;
-        Deque<Integer> stack = new ArrayDeque<>();
-        int k = -1;
-        for (int i = len - 1; i >= 0; i--) {
-            if (k > -1 && nums[i] < nums[k]) return true;
-            while (!stack.isEmpty() && nums[i] > nums[stack.peek()]) k = stack.pop();
-            stack.push(i);
+        Deque<int[]> stack = new ArrayDeque<>();
+        int min = nums[0];
+        for (int i = 1; i < len; i++) {
+            int curr = nums[i];
+            while (!stack.isEmpty() && curr >= stack.peek()[0]) stack.pop();
+            if (!stack.isEmpty() && curr > stack.peek()[1]) return true;
+            stack.push(new int[]{curr, min});
+            if (curr < min) min = curr;
         }
         return false;
     }
